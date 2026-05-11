@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FixTech — Service HP Profesional</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   GLOBAL & VARIABLES
+═══════════════════════════════════════ */
+:root {
+  --bg:#0A0A0F; --bg2:#111118; --bg3:#16161F;
+  --card:#1A1A26; --card2:#1F1F2E;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+  --cyan:#00D4FF; --cyan2:#00A8CC;
+  --cyan-glow:rgba(0,212,255,0.15); --cyan-glow2:rgba(0,212,255,0.08);
+  --text:#F0F0F8; --text2:#9898B0; --text3:#5A5A72;
+  --green:#00FF88; --green-dim:rgba(0,255,136,0.1);
+  --yellow:#FFC400; --yellow-dim:rgba(255,196,0,0.1);
+  --red:#FF4466; --red-dim:rgba(255,68,102,0.1);
+  --radius:12px; --radius2:20px; --sidebar:240px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");opacity:0.4}
+
+/* ── PAGE SYSTEM ── */
+.page-view{display:none;min-height:100vh}
+.page-view.active{display:block}
+/* Admin layout exception */
+#view-admin-dashboard.active{display:flex}
+
+.orb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
+.orb1{width:600px;height:600px;background:rgba(0,212,255,0.06);top:-200px;left:-200px}
+.orb2{width:400px;height:400px;background:rgba(0,212,255,0.04);bottom:100px;right:-100px}
+
+/* ── ANIMATIONS ── */
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity 0.6s ease,transform 0.6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:0.1s}
+.reveal-delay-2{transition-delay:0.2s}
+.reveal-delay-3{transition-delay:0.3s}
+
+/* ═══════════════════════════════════════
+   SHARED COMPONENTS
+═══════════════════════════════════════ */
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--cyan),var(--cyan2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--cyan);color:#000;font-weight:700;padding:14px 28px;border-radius:10px;border:none;cursor:pointer;transition:all 0.25s;font-family:'DM Sans',sans-serif;font-size:15px;text-decoration:none}
+.btn-primary:hover{background:var(--cyan2);transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,212,255,0.3)}
+.btn-secondary{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--text);padding:14px 28px;border-radius:10px;border:1px solid var(--border2);cursor:pointer;transition:all 0.25s;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;text-decoration:none}
+.btn-secondary:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-glow2)}
+.section-label{display:inline-flex;align-items:center;gap:8px;color:var(--cyan);font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px}
+.section-label::before{content:'';width:20px;height:1px;background:var(--cyan)}
+.section-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,3.5vw,44px);font-weight:800;line-height:1.2;margin-bottom:14px}
+.section-sub{font-size:16px;color:var(--text2);max-width:560px;font-weight:300;line-height:1.8}
+.section-wrap{padding:100px 60px}
+.form-group{margin-bottom:18px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;transition:all 0.2s;outline:none}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,212,255,0.08);background:var(--card2)}
+.form-group input::placeholder,.form-group textarea::placeholder{color:var(--text3)}
+.form-group select{appearance:none;cursor:pointer}
+select option{background:var(--card2)}
+.form-group textarea{resize:vertical;min-height:100px}
+.modal-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal-box{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius2);padding:32px;width:90%;max-width:500px;transform:scale(0.93);transition:transform 0.3s;position:relative;max-height:90vh;overflow-y:auto}
+.modal-overlay.show .modal-box{transform:scale(1)}
+.modal-close-btn{position:absolute;top:14px;right:14px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.modal-close-btn:hover{color:var(--text)}
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;font-size:11px;font-weight:700}
+.status-badge::before{content:'';width:6px;height:6px;border-radius:50%}
+.s-antrian{background:var(--red-dim);color:var(--red)}.s-antrian::before{background:var(--red)}
+.s-proses{background:var(--yellow-dim);color:var(--yellow)}.s-proses::before{background:var(--yellow);animation:blink 1.2s infinite}
+.s-selesai{background:var(--green-dim);color:var(--green)}.s-selesai::before{background:var(--green)}
+.toast-el{position:fixed;bottom:24px;right:24px;z-index:500;background:var(--card);border:1px solid var(--border2);border-radius:var(--radius2);padding:14px 20px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;transform:translateY(80px);opacity:0;transition:all 0.3s;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+.toast-el.show{transform:translateY(0);opacity:1}
+.toast-el.success{border-color:rgba(0,255,136,0.3)}
+.toast-el.error-t{border-color:rgba(255,68,102,0.3)}
+.btn-wa-link{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;background:#25D366;color:#fff;font-weight:700;font-size:14px;border-radius:10px;border:none;cursor:pointer;text-decoration:none;transition:all 0.2s;font-family:'DM Sans',sans-serif}
+.btn-wa-link:hover{background:#1ebe5d;transform:translateY(-2px)}
+
+/* ═══════════════════════════════════════
+   PAGE 1: LANDING
+═══════════════════════════════════════ */
+/* NAV */
+#landing-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 60px;background:rgba(10,10,15,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:padding 0.3s}
+.lnav-logo{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:22px;color:var(--text);display:flex;align-items:center;gap:10px;cursor:pointer}
+.lnav-logo span{color:var(--cyan)}
+.lnav-links{display:flex;gap:36px;align-items:center}
+.lnav-links a{color:var(--text2);text-decoration:none;font-size:14px;font-weight:500;transition:color 0.2s;cursor:pointer}
+.lnav-links a:hover{color:var(--text)}
+.lnav-cta{background:var(--cyan)!important;color:#000!important;padding:9px 22px;border-radius:8px;font-weight:600!important}
+.lnav-cta:hover{background:var(--cyan2)!important;transform:translateY(-1px)}
+/* HERO */
+#hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:120px 60px 80px;gap:60px;position:relative;z-index:1}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--cyan-glow2);border:1px solid rgba(0,212,255,0.2);border-radius:100px;padding:6px 16px;margin-bottom:28px;font-size:12px;font-weight:500;color:var(--cyan);letter-spacing:0.05em;text-transform:uppercase}
+.eyebrow-dot{width:6px;height:6px;background:var(--cyan);border-radius:50%;animation:pulse 2s infinite}
+.hero-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(40px,5vw,64px);font-weight:800;line-height:1.25;letter-spacing:-0.5px;margin-bottom:28px}
+.hero-title em{font-style:normal;color:var(--cyan)}
+.hero-title .line2{color:var(--text2)}
+.hero-sub{font-size:16px;color:var(--text2);max-width:440px;margin-bottom:40px;font-weight:300;line-height:1.8}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap}
+.hero-stats{display:flex;gap:40px;margin-top:52px;padding-top:40px;border-top:1px solid var(--border)}
+.stat-num{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:800;color:var(--cyan)}
+.stat-label{font-size:13px;color:var(--text3);margin-top:2px}
+.hero-visual{display:flex;align-items:center;justify-content:center}
+.mockup-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius2);padding:28px;width:100%;max-width:380px;position:relative;overflow:hidden}
+.mockup-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.mockup-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.mockup-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px}
+.badge-live{background:var(--green-dim);color:var(--green);border-radius:100px;padding:4px 10px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:5px}
+.badge-live::before{content:'';width:5px;height:5px;background:var(--green);border-radius:50%}
+.order-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;background:var(--card2);margin-bottom:10px;border:1px solid var(--border)}
+.order-icon{font-size:20px}
+.order-name{font-size:13px;font-weight:500}
+.order-detail{font-size:11px;color:var(--text3);margin-top:2px}
+.order-status{margin-left:auto;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px}
+.status-proses{background:rgba(255,196,0,0.1);color:#FFC400}
+.status-selesai{background:var(--green-dim);color:var(--green)}
+.status-menunggu{background:rgba(255,68,102,0.1);color:var(--red)}
+.revenue-section{margin-top:20px;padding-top:20px;border-top:1px solid var(--border)}
+.revenue-label{font-size:11px;color:var(--text3);margin-bottom:6px}
+.revenue-num{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:800;color:var(--cyan)}
+.revenue-sub{font-size:11px;color:var(--green);margin-top:2px}
+.bar-chart{display:flex;align-items:flex-end;gap:6px;margin-top:16px;height:60px}
+.bar{flex:1;border-radius:4px 4px 0 0;background:var(--bg3);transition:background 0.3s;cursor:pointer}
+.bar.active{background:var(--cyan)}
+.bar:hover{background:rgba(0,212,255,0.4)}
+/* SERVICES */
+#services{background:var(--bg2);position:relative;z-index:1}
+.services-header{text-align:center;margin-bottom:60px}
+.services-header .section-label{justify-content:center}
+.services-header .section-label::before{display:none}
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.service-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:28px 24px;transition:all 0.3s;cursor:pointer;position:relative;overflow:hidden}
+.service-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--cyan-glow2),transparent);opacity:0;transition:opacity 0.3s}
+.service-card:hover{border-color:rgba(0,212,255,0.3);transform:translateY(-4px)}
+.service-card:hover::before{opacity:1}
+.service-icon{width:52px;height:52px;background:var(--bg3);border-radius:12px;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:18px}
+.service-name{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;margin-bottom:8px}
+.service-desc{font-size:13px;color:var(--text2);line-height:1.7}
+.service-price{font-size:13px;color:var(--cyan);margin-top:16px;font-weight:600}
+/* HOW */
+#how{padding:100px 60px;position:relative;z-index:1}
+.how-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.steps{display:flex;flex-direction:column}
+.step{display:flex;gap:20px;padding:24px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:all 0.2s}
+.step:first-child{padding-top:0}
+.step-num{width:40px;height:40px;flex-shrink:0;background:var(--card);border:1px solid var(--border2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:14px;color:var(--text3);transition:all 0.2s}
+.step.active .step-num{background:var(--cyan);color:#000;border-color:var(--cyan)}
+.step-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;margin-bottom:6px}
+.step-desc{font-size:13px;color:var(--text2);line-height:1.7}
+.how-visual{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius2);padding:32px}
+.phone-screen{background:var(--bg);border-radius:16px;padding:20px;border:1px solid var(--border2)}
+.phone-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.phone-label{font-size:11px;color:var(--text3)}
+.phone-val{font-size:13px;font-weight:500}
+.phone-val.cyan{color:var(--cyan)}
+/* ORDER FORM */
+#order{background:var(--bg2);padding:100px 60px;position:relative;z-index:1}
+.form-wrap{display:grid;grid-template-columns:1fr 1.4fr;gap:80px;align-items:start;margin-top:60px}
+.info-list{display:flex;flex-direction:column;gap:16px}
+.info-item{display:flex;gap:14px;align-items:flex-start}
+.info-item-icon{font-size:20px;flex-shrink:0;margin-top:2px}
+.info-item-text strong{display:block;font-size:14px;font-weight:600;margin-bottom:2px}
+.info-item-text span{font-size:13px;color:var(--text2)}
+.form-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius2);padding:36px;position:relative;overflow:hidden}
+.form-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.form-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;margin-bottom:28px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-divider{height:1px;background:var(--border);margin:20px 0}
+.form-note{font-size:12px;color:var(--text3);text-align:center;margin-top:14px;line-height:1.6}
+.form-note span{color:var(--green)}
+.btn-submit{width:100%;padding:16px;background:var(--cyan);color:#000;font-weight:700;font-family:'Space Grotesk',sans-serif;font-size:15px;border:none;border-radius:10px;cursor:pointer;transition:all 0.25s;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-submit:hover{background:var(--cyan2);transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,212,255,0.3)}
+/* FOOTER */
+footer{background:var(--bg);border-top:1px solid var(--border);padding:60px;position:relative;z-index:1}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:48px}
+.footer-brand p{font-size:14px;color:var(--text2);margin-top:14px;line-height:1.8;max-width:260px}
+.footer-col h4{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;margin-bottom:16px}
+.footer-col a{display:block;color:var(--text2);text-decoration:none;font-size:13px;margin-bottom:10px;transition:color 0.2s;cursor:pointer}
+.footer-col a:hover{color:var(--cyan)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:28px;border-top:1px solid var(--border);font-size:13px;color:var(--text3)}
+/* SUCCESS MODAL */
+.modal-icon-lg{font-size:60px;margin-bottom:20px;text-align:center}
+.modal-title-lg{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:800;margin-bottom:12px;text-align:center}
+.modal-desc-p{color:var(--text2);font-size:14px;line-height:1.8;margin-bottom:28px;text-align:center}
+
+/* ═══════════════════════════════════════
+   PAGE 2: TRACKING
+═══════════════════════════════════════ */
+#view-tracking{flex-direction:column}
+.track-nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:16px 60px;background:rgba(10,10,15,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.track-nav-logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;color:var(--text);display:flex;align-items:center;gap:10px;cursor:pointer}
+.track-nav-logo span{color:var(--cyan)}
+.track-back{font-size:13px;color:var(--text3);cursor:pointer;transition:color 0.2s;background:none;border:none;font-family:'DM Sans',sans-serif}
+.track-back:hover{color:var(--cyan)}
+.track-main{flex:1;position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;padding:60px 24px 80px}
+.track-header{text-align:center;margin-bottom:44px}
+.track-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--cyan-glow2);border:1px solid rgba(0,212,255,0.2);border-radius:100px;padding:5px 14px;margin-bottom:18px;font-size:12px;font-weight:500;color:var(--cyan);letter-spacing:0.06em;text-transform:uppercase}
+.search-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius2);padding:32px;width:100%;max-width:560px;margin-bottom:32px;position:relative;overflow:hidden}
+.search-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.search-tabs{display:flex;gap:8px;margin-bottom:24px}
+.stab{flex:1;padding:9px;border-radius:8px;font-size:13px;font-weight:600;border:1px solid var(--border2);background:var(--bg3);color:var(--text3);cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif}
+.stab.active{background:var(--cyan-glow);color:var(--cyan);border-color:rgba(0,212,255,0.3)}
+.search-group{position:relative;margin-bottom:16px}
+.search-group label{display:block;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px}
+.search-group input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:13px 16px 13px 44px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:all 0.2s}
+.search-group input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,212,255,0.08)}
+.search-group input::placeholder{color:var(--text3)}
+.search-icon{position:absolute;left:14px;top:38px;font-size:16px}
+.btn-cari{width:100%;padding:14px;background:var(--cyan);color:#000;font-weight:700;font-family:'Space Grotesk',sans-serif;font-size:15px;border:none;border-radius:10px;cursor:pointer;transition:all 0.25s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-cari:hover{background:var(--cyan2);transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,212,255,0.3)}
+.result-wrap{width:100%;max-width:560px}
+.order-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius2);overflow:hidden;margin-bottom:14px;animation:fadeIn 0.4s ease}
+.order-card-header{padding:18px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);background:var(--bg3)}
+.order-id-text{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700}
+.order-date-text{font-size:12px;color:var(--text3);margin-top:2px}
+.order-body{padding:20px 22px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.detail-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px}
+.detail-val{font-size:13px;font-weight:500}
+.detail-val.cyan{color:var(--cyan)}
+.deskripsi-box{background:var(--bg3);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:16px}
+.biaya-row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--cyan-glow2);border:1px solid rgba(0,212,255,0.2);border-radius:8px}
+.biaya-val{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:var(--cyan)}
+.timeline-wrap{margin-top:20px;padding-top:20px;border-top:1px solid var(--border)}
+.timeline-lbl{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:16px}
+.tl-steps{display:flex;align-items:center}
+.tl-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative}
+.tl-step:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:var(--border2);z-index:0}
+.tl-step.done:not(:last-child)::after{background:var(--cyan)}
+.tl-dot{width:28px;height:28px;border-radius:50%;background:var(--bg3);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;position:relative;z-index:1;transition:all 0.3s}
+.tl-step.done .tl-dot{background:var(--cyan);border-color:var(--cyan)}
+.tl-step.active .tl-dot{background:var(--yellow);border-color:var(--yellow);box-shadow:0 0 12px rgba(255,196,0,0.4)}
+.tl-label{font-size:10px;color:var(--text3);text-align:center}
+.tl-step.done .tl-label,.tl-step.active .tl-label{color:var(--text2)}
+.state-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:40px 24px;text-align:center;margin-bottom:16px}
+.state-box .sicon{font-size:44px;margin-bottom:14px}
+.state-box h3{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:8px}
+.state-box p{font-size:13px;color:var(--text2);line-height:1.7}
+
+/* ═══════════════════════════════════════
+   PAGE 3: ADMIN LOGIN
+═══════════════════════════════════════ */
+#view-admin-login{align-items:center;justify-content:center;padding:24px}
+.login-wrap{position:relative;z-index:1;width:100%;max-width:420px}
+.login-logo{text-align:center;margin-bottom:32px}
+.login-logo-icon{width:56px;height:56px;background:linear-gradient(135deg,var(--cyan),var(--cyan2));border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:14px}
+.login-logo h1{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700}
+.login-logo h1 span{color:var(--cyan)}
+.login-logo p{font-size:13px;color:var(--text3);margin-top:4px}
+.login-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius2);padding:36px 32px;position:relative;overflow:hidden}
+.login-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.login-card h2{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;margin-bottom:6px}
+.login-card>p{font-size:13px;color:var(--text2);margin-bottom:28px}
+.input-wrap{position:relative}
+.toggle-pw{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;transition:color 0.2s}
+.toggle-pw:hover{color:var(--text)}
+.error-msg{display:none;background:var(--red-dim);border:1px solid rgba(255,68,102,0.3);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:18px;align-items:center;gap:8px}
+.error-msg.show{display:flex}
+.btn-login{width:100%;padding:14px;background:var(--cyan);color:#000;font-weight:700;font-family:'Space Grotesk',sans-serif;font-size:15px;border:none;border-radius:10px;cursor:pointer;transition:all 0.25s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-login:hover{background:var(--cyan2);transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,212,255,0.3)}
+.btn-login.loading{opacity:0.7;pointer-events:none}
+.login-footer{text-align:center;margin-top:20px;font-size:12px;color:var(--text3)}
+.login-footer a{color:var(--cyan);text-decoration:none;cursor:pointer}
+.attempt-badge{display:none;text-align:center;margin-top:14px;font-size:12px;color:var(--red)}
+.shake{animation:shake 0.4s ease}
+
+/* ═══════════════════════════════════════
+   PAGE 4: ADMIN DASHBOARD
+═══════════════════════════════════════ */
+.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50}
+.sidebar-logo{padding:22px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;cursor:pointer}
+.logo-text-s{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;color:var(--text)}
+.logo-text-s span{color:var(--cyan)}
+.sidebar-badge{font-size:10px;color:var(--text3);background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:2px 6px;margin-left:auto}
+.nav-section{padding:20px 12px 8px;flex:1;overflow-y:auto}
+.nav-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;padding:0 8px;margin-bottom:6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--radius);color:var(--text2);font-size:14px;font-weight:500;transition:all 0.2s;cursor:pointer;margin-bottom:2px;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;text-decoration:none}
+.nav-item:hover{background:var(--card);color:var(--text)}
+.nav-item.active{background:var(--cyan-glow2);color:var(--cyan)}
+.nav-item .icon{font-size:16px;width:20px;text-align:center}
+.badge-count{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:100px}
+.sidebar-footer{padding:16px 12px;border-top:1px solid var(--border)}
+.admin-info{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--radius);background:var(--card);margin-bottom:8px}
+.admin-avatar{width:32px;height:32px;background:linear-gradient(135deg,var(--cyan),var(--cyan2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.admin-name-t{font-size:13px;font-weight:600}
+.admin-role-t{font-size:11px;color:var(--text3)}
+.btn-logout{width:100%;padding:9px;background:var(--red-dim);color:var(--red);border:1px solid rgba(255,68,102,0.2);border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;font-family:'DM Sans',sans-serif}
+.btn-logout:hover{background:rgba(255,68,102,0.2)}
+.adm-main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{position:sticky;top:0;z-index:40;background:rgba(10,10,15,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between}
+.topbar-title{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-date{font-size:13px;color:var(--text3)}
+.notif-btn{position:relative;width:38px;height:38px;background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all 0.2s}
+.notif-btn:hover{border-color:var(--cyan)}
+.notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--bg)}
+.adm-content{padding:28px 32px;flex:1}
+.adm-page{display:none}
+.adm-page.active{display:block}
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.metric-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:20px;position:relative;overflow:hidden;transition:border-color 0.2s}
+.metric-card:hover{border-color:var(--border2)}
+.metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.metric-card.cyan::before{background:var(--cyan)}
+.metric-card.green::before{background:var(--green)}
+.metric-card.yellow::before{background:var(--yellow)}
+.metric-card.red::before{background:var(--red)}
+.metric-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.metric-icon{font-size:22px}
+.metric-change{font-size:11px;font-weight:600;padding:3px 8px;border-radius:100px}
+.metric-change.up{background:var(--green-dim);color:var(--green)}
+.metric-num{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;margin-bottom:4px}
+.metric-label{font-size:12px;color:var(--text3)}
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:22px}
+.chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.chart-title{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700}
+.chart-filter{display:flex;gap:4px}
+.filter-btn{padding:4px 10px;font-size:11px;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--text3);cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif}
+.filter-btn.active{background:var(--cyan-glow2);color:var(--cyan);border-color:rgba(0,212,255,0.3)}
+.bar-chart-wrap{display:flex;align-items:flex-end;gap:8px;height:140px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+.bar-fill{width:100%;border-radius:4px 4px 0 0;background:var(--bg3);transition:all 0.4s;cursor:pointer}
+.bar-fill:hover{filter:brightness(1.3)}
+.bar-fill.active{background:var(--cyan)}
+.bar-day{font-size:10px;color:var(--text3)}
+.donut-wrap{display:flex;flex-direction:column;align-items:center;gap:16px}
+.donut-svg{width:120px;height:120px}
+.donut-legend{width:100%;display:flex;flex-direction:column;gap:8px}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:12px}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.legend-label{color:var(--text2);flex:1}
+.legend-val{font-weight:600;color:var(--text)}
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;margin-bottom:24px}
+.table-header{padding:18px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.table-title{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700}
+.table-actions{display:flex;gap:8px;align-items:center}
+.search-input-adm{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:200px;transition:all 0.2s}
+.search-input-adm:focus{border-color:var(--cyan)}
+.search-input-adm::placeholder{color:var(--text3)}
+.btn-sm{padding:7px 14px;font-size:12px;font-weight:600;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif}
+.btn-sm:hover{color:var(--text);border-color:var(--cyan)}
+.btn-sm.primary{background:var(--cyan);color:#000;border-color:var(--cyan)}
+.btn-sm.primary:hover{background:var(--cyan2)}
+table{width:100%;border-collapse:collapse}
+thead tr{border-bottom:1px solid var(--border)}
+thead th{padding:12px 22px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em}
+tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--bg3)}
+tbody td{padding:14px 22px;font-size:13px}
+.td-name{font-weight:500}
+.td-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.action-btns{display:flex;gap:6px}
+.action-btn{padding:5px 10px;font-size:11px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif}
+.action-btn:hover{color:var(--text);background:var(--card2)}
+.action-btn.danger:hover{color:var(--red);border-color:rgba(255,68,102,0.3)}
+.status-select{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--text);font-family:'DM Sans',sans-serif;cursor:pointer;outline:none}
+.stok-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.stok-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:24px}
+.stok-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:18px;transition:all 0.2s}
+.stok-card:hover{border-color:var(--border2)}
+.stok-card.low{border-color:rgba(255,68,102,0.3)}
+.stok-icon{font-size:28px;margin-bottom:12px}
+.stok-name{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;margin-bottom:4px}
+.stok-cat{font-size:11px;color:var(--text3);margin-bottom:14px}
+.stok-qty-row{display:flex;align-items:center;justify-content:space-between}
+.stok-qty{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700}
+.stok-qty.low{color:var(--red)}
+.stok-qty.ok{color:var(--green)}
+.stok-unit{font-size:11px;color:var(--text3)}
+.stok-warn{font-size:11px;color:var(--red);margin-top:8px;display:flex;align-items:center;gap:4px}
+.laporan-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.period-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:22px}
+.period-title{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;margin-bottom:16px;color:var(--text2)}
+.period-amount{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px}
+.period-sub{font-size:12px;color:var(--text3)}
+.detail-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.detail-row:last-child{border-bottom:none}
+.detail-row-label{color:var(--text3)}
+.detail-row-val{font-weight:500;text-align:right;max-width:60%}
+/* Notif Panel */
+.notif-panel{display:none;position:absolute;top:48px;right:0;width:300px;background:var(--card);border:1px solid var(--border2);border-radius:var(--radius2);box-shadow:0 20px 60px rgba(0,0,0,0.5);z-index:200;overflow:hidden}
+.notif-panel-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.notif-panel-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px}
+.notif-clear{font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif}
+.notif-list{max-height:300px;overflow-y:auto}
+.notif-item{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start}
+.notif-item.unread{background:rgba(0,212,255,0.04)}
+.notif-item-name{font-size:13px;font-weight:500;margin-bottom:2px}
+.notif-item-sub{font-size:11px;color:var(--text3)}
+.notif-item-id{font-size:10px;color:var(--cyan);white-space:nowrap;font-weight:600}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  #landing-nav{padding:16px 24px}
+  .lnav-links{display:none}
+  #hero{grid-template-columns:1fr;padding:100px 24px 60px}
+  .hero-visual{display:none}
+  .section-wrap,#order,#how,footer{padding:70px 24px}
+  .how-inner,.form-wrap{grid-template-columns:1fr;gap:40px}
+  .footer-grid{grid-template-columns:1fr 1fr;gap:32px}
+  .form-row{grid-template-columns:1fr}
+  .hero-stats{gap:24px}
+  .track-nav{padding:14px 20px}
+  .detail-grid{grid-template-columns:1fr}
+  .sidebar{transform:translateX(-100%)}
+  .adm-main{margin-left:0}
+  .metrics-grid{grid-template-columns:1fr 1fr}
+  .charts-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<!-- ████████████████████████████████████
+     PAGE 1 — LANDING
+████████████████████████████████████ -->
+<div class="page-view active" id="view-landing">
+
+<!-- NAV -->
+<nav id="landing-nav">
+  <div class="lnav-logo" onclick="goTo('landing')">
+    <div class="logo-icon">🔧</div>
+    Fix<span>Tech</span>
+  </div>
+  <div class="lnav-links">
+    <a onclick="scrollTo2('services')">Layanan</a>
+    <a onclick="scrollTo2('how')">Cara Kerja</a>
+    <a onclick="scrollTo2('order')">Pesan Service</a>
+    <a onclick="goTo('tracking')" style="color:var(--text2)">Cek Status</a>
+    <a onclick="scrollTo2('order')" class="lnav-cta">Mulai Sekarang</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-content reveal">
+    <div class="hero-eyebrow"><div class="eyebrow-dot"></div>Platform Service HP #1 di Kota Anda</div>
+    <h1 class="hero-title">Rusak? Kami<br><em>Perbaiki.</em><br><span class="line2">Cepat & Tepat.</span></h1>
+    <p class="hero-sub">FixTech hadir untuk mempermudah kamu memesan layanan service HP, memantau status perbaikan, dan terhubung langsung dengan teknisi profesional.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="scrollTo2('order')">📱 Pesan Service Sekarang</button>
+      <button class="btn-secondary" onclick="goTo('tracking')">🔍 Cek Status HP →</button>
+    </div>
+    <div class="hero-stats">
+      <div><div class="stat-num" id="counter-1">0</div><div class="stat-label">HP diperbaiki</div></div>
+      <div><div class="stat-num" id="counter-2">0</div><div class="stat-label">Pelanggan puas</div></div>
+      <div><div class="stat-num" id="counter-3">0</div><div class="stat-label">Teknisi aktif</div></div>
+    </div>
+  </div>
+  <div class="hero-visual reveal reveal-delay-2">
+    <div class="mockup-card">
+      <div class="mockup-header"><span class="mockup-title">📊 Dashboard Pemilik</span><span class="badge-live">Live</span></div>
+      <div class="order-item"><div class="order-icon">📱</div><div><div class="order-name">iPhone 14 Pro — Layar Retak</div><div class="order-detail">Budi Santoso • 10 menit lalu</div></div><div class="order-status status-proses">Proses</div></div>
+      <div class="order-item"><div class="order-icon">🔋</div><div><div class="order-name">Samsung S23 — Ganti Baterai</div><div class="order-detail">Rina Dewi • 1 jam lalu</div></div><div class="order-status status-selesai">Selesai</div></div>
+      <div class="order-item"><div class="order-icon">💧</div><div><div class="order-name">Xiaomi 13 — Kena Air</div><div class="order-detail">Agus Wijaya • baru masuk</div></div><div class="order-status status-menunggu">Antrian</div></div>
+      <div class="revenue-section">
+        <div class="revenue-label">PENDAPATAN MINGGU INI</div>
+        <div class="revenue-num">Rp 4.750.000</div>
+        <div class="revenue-sub">↑ 18% dari minggu lalu</div>
+        <div class="bar-chart">
+          <div class="bar" style="height:30%"></div><div class="bar" style="height:50%"></div><div class="bar" style="height:40%"></div><div class="bar" style="height:70%"></div><div class="bar" style="height:55%"></div><div class="bar active" style="height:85%"></div><div class="bar" style="height:65%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services" class="section-wrap">
+  <div class="services-header reveal">
+    <div class="section-label" style="justify-content:center;margin-bottom:16px"><span style="display:none"></span>Layanan Kami</div>
+    <h2 class="section-title">Keahlian Kami Untuk<br>Smartphone Anda</h2>
+    <p class="section-sub" style="margin:0 auto">Teknisi berpengalaman dengan peralatan profesional untuk semua jenis kerusakan HP.</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-card reveal"><div class="service-icon">🖥️</div><div class="service-name">Ganti LCD / Layar</div><div class="service-desc">Penggantian layar retak atau mati dengan sparepart berkualitas. Garansi 30 hari.</div><div class="service-price">Mulai Rp 150.000</div></div>
+    <div class="service-card reveal reveal-delay-1"><div class="service-icon">🔋</div><div class="service-name">Ganti Baterai</div><div class="service-desc">Baterai boros atau tidak mau mengisi? Kami ganti dengan baterai original.</div><div class="service-price">Mulai Rp 80.000</div></div>
+    <div class="service-card reveal reveal-delay-2"><div class="service-icon">💧</div><div class="service-name">Kemasukan Air</div><div class="service-desc">Penanganan khusus HP yang terkena air atau cairan. Pembersihan komponen menyeluruh.</div><div class="service-price">Mulai Rp 120.000</div></div>
+    <div class="service-card reveal reveal-delay-3"><div class="service-icon">📷</div><div class="service-name">Ganti Kamera</div><div class="service-desc">Kamera buram, berembun, atau tidak berfungsi? Kami siap menangani.</div><div class="service-price">Mulai Rp 200.000</div></div>
+    <div class="service-card reveal"><div class="service-icon">🔌</div><div class="service-name">Port Charging</div><div class="service-desc">Masalah pengisian daya? Perbaikan atau penggantian port USB / Lightning.</div><div class="service-price">Mulai Rp 75.000</div></div>
+    <div class="service-card reveal reveal-delay-1"><div class="service-icon">📡</div><div class="service-name">Masalah Sinyal</div><div class="service-desc">HP tidak ada sinyal atau WiFi bermasalah. Perbaikan modul antena dan jaringan.</div><div class="service-price">Mulai Rp 100.000</div></div>
+    <div class="service-card reveal reveal-delay-2"><div class="service-icon">🔒</div><div class="service-name">Lupa Pola / PIN</div><div class="service-desc">HP terkunci dan tidak bisa dibuka? Kami bantu dengan aman tanpa hapus data.</div><div class="service-price">Mulai Rp 60.000</div></div>
+    <div class="service-card reveal reveal-delay-3"><div class="service-icon">⚡</div><div class="service-name">Mati Total</div><div class="service-desc">HP tidak mau menyala sama sekali. Diagnosa menyeluruh dan perbaikan IC power.</div><div class="service-price">Mulai Rp 180.000</div></div>
+  </div>
+</section>
+
+<!-- HOW -->
+<section id="how">
+  <div class="section-wrap">
+    <div class="how-inner">
+      <div>
+        <div class="section-label reveal">Cara Kerja</div>
+        <h2 class="section-title reveal">Semudah 4 Langkah</h2>
+        <p class="section-sub reveal" style="margin-bottom:40px">Tidak perlu antri panjang. Pesan service HP-mu dari mana saja, kapan saja.</p>
+        <div class="steps">
+          <div class="step active reveal" onclick="setActiveStep(this)"><div class="step-num">01</div><div><div class="step-title">Isi Formulir Service</div><div class="step-desc">Lengkapi data diri dan detail kerusakan HP kamu melalui form yang tersedia.</div></div></div>
+          <div class="step reveal reveal-delay-1" onclick="setActiveStep(this)"><div class="step-num">02</div><div><div class="step-title">Terhubung via WhatsApp</div><div class="step-desc">Permintaan kamu dikirim langsung ke teknisi. Diskusikan jadwal dan estimasi biaya.</div></div></div>
+          <div class="step reveal reveal-delay-2" onclick="setActiveStep(this)"><div class="step-num">03</div><div><div class="step-title">HP Diperbaiki</div><div class="step-desc">Teknisi kami mengerjakan HP-mu dengan hati-hati. Pantau status perbaikan real-time.</div></div></div>
+          <div class="step reveal reveal-delay-3" onclick="setActiveStep(this)"><div class="step-num">04</div><div><div class="step-title">Selesai & Bergaransi</div><div class="step-desc">HP kembali normal! Setiap pekerjaan dilengkapi garansi resmi dari FixTech.</div></div></div>
+        </div>
+      </div>
+      <div class="reveal reveal-delay-2">
+        <div class="how-visual">
+          <div class="mockup-title" style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;margin-bottom:20px">📋 Detail Permintaan Service</div>
+          <div class="phone-screen">
+            <div class="phone-row"><span class="phone-label">NAMA</span><span class="phone-val">Andi Pratama</span></div>
+            <div class="phone-row"><span class="phone-label">NOMOR HP</span><span class="phone-val">0812-3456-7890</span></div>
+            <div class="phone-row"><span class="phone-label">MEREK</span><span class="phone-val cyan">Samsung</span></div>
+            <div class="phone-row"><span class="phone-label">SERI</span><span class="phone-val">Galaxy S23 Ultra</span></div>
+            <div class="phone-row"><span class="phone-label">KERUSAKAN</span><span class="phone-val cyan">Layar Retak</span></div>
+            <div style="margin-top:16px;padding:12px;background:rgba(0,212,255,0.08);border-radius:8px;border:1px solid rgba(0,212,255,0.2);display:flex;align-items:center;gap:10px">
+              <span>✅</span><div><div style="font-size:12px;font-weight:600;color:var(--cyan)">Permintaan dikirim!</div><div style="font-size:11px;color:var(--text3)">Menghubungkan ke WhatsApp teknisi...</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ORDER FORM -->
+<section id="order">
+  <div class="section-wrap">
+    <div class="form-wrap">
+      <div>
+        <div class="section-label reveal">Pesan Sekarang</div>
+        <h2 class="section-title reveal">Pesan Service<br>HP Kamu</h2>
+        <p class="reveal" style="font-size:15px;color:var(--text2);line-height:1.8;margin-bottom:32px">Isi formulir di bawah ini dan kamu akan langsung diarahkan ke chat WhatsApp teknisi kami.</p>
+        <div class="info-list">
+          <div class="info-item reveal"><div class="info-item-icon">⚡</div><div class="info-item-text"><strong>Respon Cepat</strong><span>Teknisi merespons dalam 15 menit</span></div></div>
+          <div class="info-item reveal reveal-delay-1"><div class="info-item-icon">🛡️</div><div class="info-item-text"><strong>Garansi Pekerjaan</strong><span>Semua perbaikan bergaransi 30 hari</span></div></div>
+          <div class="info-item reveal reveal-delay-2"><div class="info-item-icon">💬</div><div class="info-item-text"><strong>Langsung ke WhatsApp</strong><span>Tidak perlu install aplikasi apapun</span></div></div>
+          <div class="info-item reveal reveal-delay-3"><div class="info-item-icon">🔍</div><div class="info-item-text"><strong>Bisa Cek Status Online</strong><span>Pantau progres perbaikan HP-mu kapan saja</span></div></div>
+        </div>
+      </div>
+      <div class="form-card reveal reveal-delay-1">
+        <div class="form-title">📝 Formulir Permintaan Service</div>
+        <p id="form-error" style="color:var(--red);font-size:13px;margin-bottom:12px;display:none">⚠️ Mohon isi semua field yang wajib diisi.</p>
+        <div class="form-row">
+          <div class="form-group"><label>Nama Lengkap *</label><input type="text" id="f-nama" placeholder="Nama kamu"></div>
+          <div class="form-group"><label>No. HP Aktif *</label><input type="tel" id="f-hp" placeholder="08xx-xxxx-xxxx"></div>
+        </div>
+        <div class="form-group"><label>Alamat Lengkap *</label><input type="text" id="f-alamat" placeholder="Jl. Contoh No. 1, Kota"></div>
+        <div class="form-divider"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Merek HP *</label>
+            <select id="f-merek"><option value="">Pilih merek...</option><option>Samsung</option><option>iPhone / Apple</option><option>Xiaomi</option><option>OPPO</option><option>Vivo</option><option>Realme</option><option>Huawei</option><option>Nokia</option><option>Asus</option><option>Lainnya</option></select>
+          </div>
+          <div class="form-group"><label>Seri / Tipe HP *</label><input type="text" id="f-seri" placeholder="cth: Galaxy S23, iPhone 14"></div>
+        </div>
+        <div class="form-group"><label>Jenis Kerusakan *</label>
+          <select id="f-kerusakan"><option value="">Pilih jenis kerusakan...</option><option>LCD / Layar Retak</option><option>LCD / Layar Mati</option><option>Baterai Boros / Drop</option><option>Tidak Bisa Charge</option><option>Kemasukan Air</option><option>Kamera Bermasalah</option><option>Tidak Ada Sinyal</option><option>Mati Total</option><option>Tombol Tidak Berfungsi</option><option>Lupa Pola / PIN</option><option>Speaker / Mic Rusak</option><option>Lainnya</option></select>
+        </div>
+        <div class="form-group"><label>Deskripsi Kerusakan</label><textarea id="f-deskripsi" placeholder="Ceritakan lebih detail mengenai kerusakan HP kamu..."></textarea></div>
+        <button class="btn-submit" onclick="kirimPermintaan()"><span>💬</span> Kirim Permintaan via WhatsApp</button>
+        <p class="form-note">Kamu akan diarahkan ke <span>WhatsApp teknisi FixTech</span> secara otomatis.<br>Tidak dikenakan biaya apapun untuk konsultasi.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="lnav-logo" style="margin-bottom:0"><div class="logo-icon">🔧</div>Fix<span style="color:var(--cyan)">Tech</span></div>
+      <p>Platform service HP profesional yang menghubungkan pelanggan dan teknisi dengan mudah, cepat, dan transparan.</p>
+    </div>
+    <div class="footer-col"><h4>Layanan</h4><a>Ganti LCD</a><a>Ganti Baterai</a><a>Kena Air</a><a>Ganti Kamera</a><a>Mati Total</a></div>
+    <div class="footer-col"><h4>Navigasi</h4><a onclick="goTo('tracking')">Cek Status HP</a><a onclick="goTo('admin-login')">Login Admin</a><a onclick="scrollTo2('services')">Layanan</a><a onclick="scrollTo2('order')">Pesan Service</a></div>
+    <div class="footer-col"><h4>Legal</h4><a>Syarat & Ketentuan</a><a>Kebijakan Privasi</a><a>Garansi Service</a></div>
+  </div>
+  <div class="footer-bottom"><span>© 2025 FixTech. Semua hak dilindungi.</span><span>Dibuat dengan ❤️ untuk teknisi Indonesia</span></div>
+</footer>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="modal-success">
+  <div class="modal-box" style="text-align:center;padding:48px 40px;max-width:420px">
+    <button class="modal-close-btn" onclick="closeModal('modal-success')">✕</button>
+    <div class="modal-icon-lg">🎉</div>
+    <div class="modal-title-lg">Permintaan Terkirim!</div>
+    <div class="modal-desc-p" id="modal-desc"></div>
+    <a href="#" id="wa-link" class="btn-wa-link" target="_blank"><span>📱</span> Buka WhatsApp Sekarang</a>
+    <button onclick="goTo('tracking');closeModal('modal-success')" style="margin-top:12px;background:none;border:none;color:var(--cyan);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">🔍 Cek status di halaman tracking →</button>
+  </div>
+</div>
+
+</div><!-- /view-landing -->
+
+<!-- ████████████████████████████████████
+     PAGE 2 — TRACKING
+████████████████████████████████████ -->
+<div class="page-view" id="view-tracking">
+  <nav class="track-nav">
+    <div class="track-nav-logo" onclick="goTo('landing')"><div class="logo-icon" style="width:32px;height:32px;font-size:16px">🔧</div>Fix<span>Tech</span></div>
+    <button class="track-back" onclick="goTo('landing')">← Kembali ke beranda</button>
+  </nav>
+  <div class="track-main">
+    <div class="track-header">
+      <div class="track-eyebrow">🔍 Tracking Service</div>
+      <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,5vw,44px);font-weight:700;margin-bottom:12px">Cek Status HP Kamu</h1>
+      <p style="font-size:15px;color:var(--text2);max-width:460px;line-height:1.8">Masukkan nomor HP atau nomor tiket untuk melihat status perbaikan secara real-time.</p>
+    </div>
+    <div class="search-card">
+      <div class="search-tabs">
+        <button class="stab active" onclick="switchTrackTab('hp',this)">📞 Cari via No. HP</button>
+        <button class="stab" onclick="switchTrackTab('tiket',this)">🎫 Cari via No. Tiket</button>
+      </div>
+      <div id="ttab-hp">
+        <div class="search-group"><label>Nomor HP yang kamu daftarkan</label><span class="search-icon">📞</span><input type="tel" id="input-hp" placeholder="cth: 08123456789" onkeydown="if(event.key==='Enter')cariStatus()"></div>
+      </div>
+      <div id="ttab-tiket" style="display:none">
+        <div class="search-group"><label>Nomor tiket service</label><span class="search-icon">🎫</span><input type="text" id="input-tiket" placeholder="cth: 001" onkeydown="if(event.key==='Enter')cariStatus()"></div>
+      </div>
+      <button class="btn-cari" onclick="cariStatus()"><span>🔍</span> Cek Status Sekarang</button>
+    </div>
+    <div class="result-wrap" id="track-result"></div>
+  </div>
+</div>
+
+<!-- ████████████████████████████████████
+     PAGE 3 — ADMIN LOGIN
+████████████████████████████████████ -->
+<div class="page-view" id="view-admin-login" style="display:none;min-height:100vh;align-items:center;justify-content:center;padding:24px">
+  <div class="login-wrap">
+    <div class="login-logo">
+      <div class="login-logo-icon">🔧</div>
+      <h1>Fix<span>Tech</span></h1>
+      <p>Panel Admin</p>
+    </div>
+    <div class="login-card" id="login-card">
+      <h2>Selamat Datang 👋</h2>
+      <p>Masuk untuk mengelola permintaan service dan data usahamu.</p>
+      <div class="error-msg" id="login-error"><span>⚠️</span><span id="error-text">Username atau password salah.</span></div>
+      <div class="form-group"><label>Username</label><input type="text" id="l-user" placeholder="Masukkan username" autocomplete="off"></div>
+      <div class="form-group"><label>Password</label>
+        <div class="input-wrap">
+          <input type="password" id="l-pass" placeholder="Masukkan password" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+          <button class="toggle-pw" onclick="togglePw()" type="button" id="pw-toggle">👁️</button>
+        </div>
+      </div>
+      <button class="btn-login" id="btn-login" onclick="doLogin()"><span>🔐</span> Masuk ke Dashboard</button>
+      <div class="attempt-badge" id="attempt-badge"></div>
+    </div>
+    <div class="login-footer"><a onclick="goTo('landing')">← Kembali ke halaman utama</a></div>
+  </div>
+</div>
+
+<!-- ████████████████████████████████████
+     PAGE 4 — ADMIN DASHBOARD
+████████████████████████████████████ -->
+<div class="page-view" id="view-admin-dashboard">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo" onclick="goTo('landing')">
+      <div class="logo-icon" style="width:34px;height:34px;font-size:16px">🔧</div>
+      <span class="logo-text-s">Fix<span>Tech</span></span>
+      <span class="sidebar-badge">Admin</span>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Menu Utama</div>
+      <button class="nav-item active" onclick="goAdmPage('dashboard',this)"><span class="icon">📊</span> Dashboard</button>
+      <button class="nav-item" onclick="goAdmPage('permintaan',this)"><span class="icon">📋</span> Permintaan Service<span class="badge-count" id="notif-count">0</span></button>
+      <button class="nav-item" onclick="goAdmPage('stok',this)"><span class="icon">📦</span> Stok Barang<span class="badge-count" id="stok-warn-count" style="display:none;background:var(--yellow);color:#000">0</span></button>
+      <button class="nav-item" onclick="goAdmPage('laporan',this)"><span class="icon">💰</span> Laporan Keuangan</button>
+      <div class="nav-label" style="margin-top:20px">Halaman Lain</div>
+      <button class="nav-item" onclick="goTo('tracking')"><span class="icon">🔍</span> Halaman Tracking</button>
+      <button class="nav-item" onclick="goTo('landing')"><span class="icon">🌐</span> Landing Page</button>
+    </div>
+    <div class="sidebar-footer">
+      <div class="admin-info"><div class="admin-avatar">👤</div><div><div class="admin-name-t" id="admin-name-display">Admin</div><div class="admin-role-t">Pemilik Toko</div></div></div>
+      <button class="btn-logout" onclick="doLogout()">🚪 Keluar</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="adm-main">
+    <div class="topbar">
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-right">
+        <div class="topbar-date" id="topbar-date"></div>
+        <div style="position:relative">
+          <div class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()">🔔<div class="notif-dot" id="notif-dot" style="display:none"></div></div>
+          <div class="notif-panel" id="notif-panel">
+            <div class="notif-panel-header"><span class="notif-panel-title">Notifikasi</span><button class="notif-clear" onclick="clearNotifs()">Hapus semua</button></div>
+            <div class="notif-list" id="notif-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="adm-content">
+
+      <!-- DASHBOARD -->
+      <div class="adm-page active" id="adm-dashboard">
+        <div class="metrics-grid">
+          <div class="metric-card cyan"><div class="metric-top"><span class="metric-icon">📋</span><span class="metric-change up">Antrian</span></div><div class="metric-num" id="m-antrian">0</div><div class="metric-label">Permintaan Masuk</div></div>
+          <div class="metric-card yellow"><div class="metric-top"><span class="metric-icon">⚙️</span><span class="metric-change up">Dikerjakan</span></div><div class="metric-num" id="m-proses">0</div><div class="metric-label">Sedang Diproses</div></div>
+          <div class="metric-card green"><div class="metric-top"><span class="metric-icon">✅</span><span class="metric-change up">Bulan ini</span></div><div class="metric-num" id="m-selesai">0</div><div class="metric-label">Selesai</div></div>
+          <div class="metric-card red"><div class="metric-top"><span class="metric-icon">💰</span><span class="metric-change up">↑ Total</span></div><div class="metric-num" id="m-pendapatan">Rp 0</div><div class="metric-label">Pendapatan</div></div>
+        </div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-header"><span class="chart-title">Pendapatan Harian</span><div class="chart-filter"><button class="filter-btn active" onclick="setFilter(this,'minggu')">Minggu</button><button class="filter-btn" onclick="setFilter(this,'bulan')">Bulan</button></div></div>
+            <div class="bar-chart-wrap" id="bar-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><span class="chart-title">Jenis Kerusakan</span></div>
+            <div class="donut-wrap">
+              <svg class="donut-svg" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="45" fill="none" stroke="#16161F" stroke-width="18"/>
+                <circle cx="60" cy="60" r="45" fill="none" stroke="#00D4FF" stroke-width="18" stroke-dasharray="113 170" stroke-dashoffset="0" stroke-linecap="round"/>
+                <circle cx="60" cy="60" r="45" fill="none" stroke="#00FF88" stroke-width="18" stroke-dasharray="57 226" stroke-dashoffset="-113" stroke-linecap="round"/>
+                <circle cx="60" cy="60" r="45" fill="none" stroke="#FFC400" stroke-width="18" stroke-dasharray="40 243" stroke-dashoffset="-170" stroke-linecap="round"/>
+                <circle cx="60" cy="60" r="45" fill="none" stroke="#FF4466" stroke-width="18" stroke-dasharray="73 210" stroke-dashoffset="-210" stroke-linecap="round"/>
+              </svg>
+              <div class="donut-legend">
+                <div class="legend-item"><div class="legend-dot" style="background:var(--cyan)"></div><span class="legend-label">LCD / Layar</span><span class="legend-val">40%</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div><span class="legend-label">Baterai</span><span class="legend-val">20%</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div><span class="legend-label">Charging</span><span class="legend-val">15%</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div><span class="legend-label">Lainnya</span><span class="legend-val">25%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><span class="table-title">Permintaan Terbaru</span><button class="btn-sm" onclick="goAdmPage('permintaan',null)">Lihat Semua →</button></div>
+          <table><thead><tr><th>Pelanggan</th><th>Perangkat</th><th>Kerusakan</th><th>Waktu</th><th>Status</th></tr></thead><tbody id="recent-orders-body"></tbody></table>
+        </div>
+      </div>
+
+      <!-- PERMINTAAN -->
+      <div class="adm-page" id="adm-permintaan">
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-title">Semua Permintaan Service</span>
+            <div class="table-actions">
+              <input class="search-input-adm" type="text" placeholder="🔍 Cari nama / HP..." id="search-input" oninput="renderOrders()">
+              <select class="btn-sm" id="filter-status" onchange="renderOrders()" style="cursor:pointer"><option value="">Semua Status</option><option value="Antrian">Antrian</option><option value="Proses">Proses</option><option value="Selesai">Selesai</option></select>
+              <button class="btn-sm primary" onclick="openModal('modal-tambah-order')">+ Tambah Manual</button>
+            </div>
+          </div>
+          <table><thead><tr><th>#</th><th>Pelanggan</th><th>No. HP</th><th>Perangkat</th><th>Kerusakan</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead><tbody id="orders-body"></tbody></table>
+        </div>
+      </div>
+
+      <!-- STOK -->
+      <div class="adm-page" id="adm-stok">
+        <div class="stok-header">
+          <div><h2 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:4px">Manajemen Stok</h2><p style="font-size:13px;color:var(--text3)">Pantau dan kelola stok spare part kamu</p></div>
+          <button class="btn-sm primary" onclick="openTambahStok()">+ Tambah Barang</button>
+        </div>
+        <div id="stok-alert" style="display:none;background:var(--red-dim);border:1px solid rgba(255,68,102,0.3);border-radius:var(--radius2);padding:14px 18px;margin-bottom:20px;font-size:13px;color:var(--red);align-items:center;gap:10px">⚠️ <span id="stok-alert-text"></span></div>
+        <div class="stok-grid" id="stok-grid"></div>
+      </div>
+
+      <!-- LAPORAN -->
+      <div class="adm-page" id="adm-laporan">
+        <div class="laporan-grid">
+          <div class="period-card"><div class="period-title">📅 MINGGU INI</div><div class="period-amount" id="lap-minggu">Rp 0</div><div class="period-sub" id="lap-minggu-count">0 order selesai</div></div>
+          <div class="period-card"><div class="period-title">🗓️ BULAN INI</div><div class="period-amount" id="lap-bulan">Rp 0</div><div class="period-sub" id="lap-bulan-count">0 order selesai</div></div>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><span class="table-title">Riwayat Transaksi Selesai</span></div>
+          <table><thead><tr><th>Pelanggan</th><th>Perangkat</th><th>Kerusakan</th><th>Tanggal</th><th>Biaya</th></tr></thead><tbody id="laporan-body"></tbody></table>
+        </div>
+      </div>
+
+    </div><!-- /adm-content -->
+  </div><!-- /adm-main -->
+</div><!-- /view-admin-dashboard -->
+
+<!-- ═══ MODALS ═══ -->
+<!-- Detail Order -->
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal-box">
+    <button class="modal-close-btn" onclick="closeModal('modal-detail')">✕</button>
+    <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:20px">📋 Detail Permintaan</h3>
+    <div id="detail-content"></div>
+    <div style="display:flex;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+      <select class="status-select" id="detail-status-select" style="flex:1;padding:10px 14px;border-radius:var(--radius)"><option value="Antrian">Antrian</option><option value="Proses">Proses</option><option value="Selesai">Selesai</option></select>
+      <input type="number" id="detail-biaya" placeholder="Biaya (Rp)" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
+      <button class="btn-sm primary" onclick="updateStatus()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tambah Order -->
+<div class="modal-overlay" id="modal-tambah-order">
+  <div class="modal-box">
+    <button class="modal-close-btn" onclick="closeModal('modal-tambah-order')">✕</button>
+    <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:20px">➕ Tambah Permintaan Manual</h3>
+    <div class="form-group"><label>Nama Pelanggan *</label><input type="text" id="to-nama" placeholder="Nama pelanggan"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label>No. HP *</label><input type="text" id="to-hp" placeholder="08xx-xxxx-xxxx"></div>
+      <div class="form-group"><label>Alamat</label><input type="text" id="to-alamat" placeholder="Alamat"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label>Merek HP *</label><select id="to-merek"><option value="">Pilih merek...</option><option>Samsung</option><option>iPhone / Apple</option><option>Xiaomi</option><option>OPPO</option><option>Vivo</option><option>Realme</option><option>Lainnya</option></select></div>
+      <div class="form-group"><label>Seri HP *</label><input type="text" id="to-seri" placeholder="cth: Galaxy S23"></div>
+    </div>
+    <div class="form-group"><label>Jenis Kerusakan *</label><select id="to-kerusakan"><option value="">Pilih kerusakan...</option><option>LCD / Layar Retak</option><option>LCD / Layar Mati</option><option>Baterai Boros</option><option>Tidak Bisa Charge</option><option>Kemasukan Air</option><option>Kamera Bermasalah</option><option>Tidak Ada Sinyal</option><option>Mati Total</option><option>Lainnya</option></select></div>
+    <div class="form-group"><label>Deskripsi</label><textarea id="to-deskripsi" placeholder="Deskripsi kerusakan..."></textarea></div>
+    <button class="btn-sm primary" style="width:100%;padding:12px;font-size:14px" onclick="tambahOrder()">Simpan Permintaan</button>
+  </div>
+</div>
+
+<!-- Tambah Stok -->
+<div class="modal-overlay" id="modal-tambah-stok">
+  <div class="modal-box">
+    <button class="modal-close-btn" onclick="closeModal('modal-tambah-stok')">✕</button>
+    <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:20px">📦 Tambah/Edit Barang</h3>
+    <input type="hidden" id="stok-edit-id">
+    <div class="form-group"><label>Nama Barang *</label><input type="text" id="ts-nama" placeholder="cth: LCD iPhone 14"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label>Kategori</label><select id="ts-kategori"><option>LCD / Layar</option><option>Baterai</option><option>Kamera</option><option>Port / Connector</option><option>Speaker / Mic</option><option>Alat Service</option><option>Lainnya</option></select></div>
+      <div class="form-group"><label>Ikon Emoji</label><input type="text" id="ts-icon" placeholder="cth: 🖥️" maxlength="4"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label>Jumlah Stok *</label><input type="number" id="ts-qty" placeholder="0" min="0"></div>
+      <div class="form-group"><label>Batas Minimum</label><input type="number" id="ts-min" placeholder="5" min="0"></div>
+    </div>
+    <div class="form-group"><label>Harga Beli (Rp)</label><input type="number" id="ts-harga" placeholder="0"></div>
+    <button class="btn-sm primary" style="width:100%;padding:12px;font-size:14px" onclick="simpanStok()">Simpan Barang</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-el" id="toast"><span id="toast-icon">✅</span><span id="toast-msg"></span></div>
+
+<!-- ████████████████████████████████████
+     JAVASCRIPT
+████████████████████████████████████ -->
+<script>
+const WA_NUMBER = "6283137573172";
+
+/* ═══ ROUTER ═══ */
+const VIEWS = ['landing','tracking','admin-login','admin-dashboard'];
+function goTo(view) {
+  // Auth guard
+  if (view === 'admin-dashboard') {
+    if (sessionStorage.getItem('fixtech_admin_auth') !== 'true') { goTo('admin-login'); return; }
+  }
+  VIEWS.forEach(v => {
+    const el = document.getElementById('view-' + v);
+    if (el) el.classList.remove('active');
+  });
+  const target = document.getElementById('view-' + view);
+  if (target) {
+    target.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+  // Post-nav hooks
+  if (view === 'landing') { initLanding(); }
+  if (view === 'admin-dashboard') { initDashboard(); }
+  if (view === 'tracking') { document.getElementById('track-result').innerHTML = ''; }
+  // Update hash safely (tidak error di iframe)
+  try { history.pushState({}, '', '#' + view); } catch(e) {}
+}
+
+// Init on load
+window.addEventListener('load', () => {
+  let hash = 'landing';
+  try { hash = location.hash.replace('#','') || 'landing'; } catch(e) {}
+  goTo(VIEWS.includes(hash) ? hash : 'landing');
+});
+try {
+  window.addEventListener('popstate', () => {
+    const hash = location.hash.replace('#','') || 'landing';
+    goTo(VIEWS.includes(hash) ? hash : 'landing');
+  });
+} catch(e) {}
+
+/* ═══ HELPERS ═══ */
+function scrollTo2(id) {
+  goTo('landing');
+  setTimeout(() => { const el = document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth'}); }, 100);
+}
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.addEventListener('click', e => {
+  document.querySelectorAll('.modal-overlay').forEach(m => { if (e.target === m) m.classList.remove('show'); });
+});
+function showToast(type, msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.className = 'toast-el ' + (type === 'success' ? 'success' : 'error-t') + ' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ═══ DATA ═══ */
+function loadOrders() { return JSON.parse(localStorage.getItem('fixtech_orders') || '[]'); }
+function saveOrders(d) { localStorage.setItem('fixtech_orders', JSON.stringify(d)); }
+function nextId() { const o = loadOrders(); return o.length ? Math.max(...o.map(x=>x.id))+1 : 1; }
+function loadStok() {
+  const def = [
+    {id:1,icon:'🖥️',nama:'LCD iPhone 14',kategori:'LCD / Layar',qty:8,min:3,harga:850000},
+    {id:2,icon:'🔋',nama:'Baterai Samsung S23',kategori:'Baterai',qty:2,min:5,harga:120000},
+    {id:3,icon:'📷',nama:'Kamera Xiaomi 13',kategori:'Kamera',qty:5,min:3,harga:200000},
+    {id:4,icon:'🔌',nama:'Port Charging Type-C',kategori:'Port / Connector',qty:15,min:5,harga:25000},
+    {id:5,icon:'🔋',nama:'Baterai iPhone 13',kategori:'Baterai',qty:1,min:3,harga:180000},
+    {id:6,icon:'🖥️',nama:'LCD Samsung A54',kategori:'LCD / Layar',qty:4,min:2,harga:320000},
+  ];
+  return JSON.parse(localStorage.getItem('fixtech_stok') || JSON.stringify(def));
+}
+function saveStok(d) { localStorage.setItem('fixtech_stok', JSON.stringify(d)); }
+function loadNotifs() { return JSON.parse(localStorage.getItem('fixtech_notifs') || '[]'); }
+
+/* ═══ LANDING ═══ */
+let counterDone = false;
+function initLanding() {
+  // Scroll reveal
+  setTimeout(() => {
+    const obs = new IntersectionObserver(entries => entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }), {threshold:0.12});
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    // Counter
+    if (!counterDone) {
+      counterDone = true;
+      animCounter('counter-1', 2840, '+');
+      animCounter('counter-2', 1290, '+');
+      animCounter('counter-3', 12, '');
+    }
+  }, 50);
+  // Nav scroll
+  window.onscroll = () => {
+    const nav = document.getElementById('landing-nav');
+    if (nav) nav.style.padding = window.scrollY > 60 ? '12px 60px' : '18px 60px';
+  };
+}
+function animCounter(id, target, suf) {
+  const el = document.getElementById(id); if(!el) return;
+  let cur = 0; const step = Math.ceil(target/60);
+  const t = setInterval(() => { cur = Math.min(cur+step, target); el.textContent = cur.toLocaleString('id')+suf; if(cur>=target) clearInterval(t); }, 30);
+}
+function setActiveStep(el) { document.querySelectorAll('.step').forEach(s=>s.classList.remove('active')); el.classList.add('active'); }
+
+/* ═══ FORM SUBMIT ═══ */
+function kirimPermintaan() {
+  const nama = document.getElementById('f-nama').value.trim();
+  const hp = document.getElementById('f-hp').value.trim();
+  const alamat = document.getElementById('f-alamat').value.trim();
+  const merek = document.getElementById('f-merek').value;
+  const seri = document.getElementById('f-seri').value.trim();
+  const kerusakan = document.getElementById('f-kerusakan').value;
+  const deskripsi = document.getElementById('f-deskripsi').value.trim();
+  const errEl = document.getElementById('form-error');
+  if (!nama||!hp||!alamat||!merek||!seri||!kerusakan) { errEl.style.display='block'; return; }
+  errEl.style.display = 'none';
+
+  const now = new Date();
+  const tgl = now.toLocaleDateString('id-ID') + ' ' + now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+  const oid = nextId();
+  const orders = loadOrders();
+  orders.push({id:oid, nama, hp, alamat, merek, seri, kerusakan, deskripsi, status:'Antrian', biaya:0, tanggal:tgl, sumber:'Form Website'});
+  saveOrders(orders);
+
+  // Simpan notif
+  const notifs = loadNotifs();
+  notifs.unshift({id:oid, nama, merek, seri, kerusakan, tanggal:tgl, read:false});
+  localStorage.setItem('fixtech_notifs', JSON.stringify(notifs.slice(0,50)));
+
+  const tiket = '#' + String(oid).padStart(3,'0');
+  const pesan = `🔧 *PERMINTAAN SERVICE - FIXTECH*\n──────────────────────\n👤 *Nama:* ${nama}\n📞 *No. HP:* ${hp}\n📍 *Alamat:* ${alamat}\n──────────────────────\n📱 *Merek HP:* ${merek}\n🔎 *Seri / Tipe:* ${seri}\n⚠️ *Jenis Kerusakan:* ${kerusakan}\n${deskripsi?`📝 *Deskripsi:* ${deskripsi}\n`:''  }──────────────────────\n🆔 *No. Tiket:* ${tiket}\n📅 *Masuk:* ${tgl}\n──────────────────────\nMohon konfirmasi jadwal dan estimasi biaya. Terima kasih! 🙏\n\n_Simpan nomor tiket ${tiket} untuk cek status HP kamu_`;
+
+  document.getElementById('wa-link').href = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(pesan)}`;
+  document.getElementById('modal-desc').innerHTML = `Halo <strong>${nama}</strong>! Permintaan kamu sudah masuk dengan nomor tiket <strong style="color:var(--cyan)">${tiket}</strong>.<br><br><small style="color:var(--text2)">Simpan nomor tiket untuk cek status HP kamu nanti.</small>`;
+  openModal('modal-success');
+  ['f-nama','f-hp','f-alamat','f-seri','f-deskripsi'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('f-merek').value='';
+  document.getElementById('f-kerusakan').value='';
+}
+
+/* ═══ TRACKING ═══ */
+let activeTrackTab = 'hp';
+function switchTrackTab(tab, btn) {
+  activeTrackTab = tab;
+  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('ttab-hp').style.display = tab==='hp'?'block':'none';
+  document.getElementById('ttab-tiket').style.display = tab==='tiket'?'block':'none';
+}
+function cariStatus() {
+  const wrap = document.getElementById('track-result');
+  const orders = loadOrders();
+  let results = [];
+  if (activeTrackTab === 'hp') {
+    const q = document.getElementById('input-hp').value.trim().replace(/[-\s]/g,'');
+    if (!q) { showTrackEmpty(wrap,'⚠️','Nomor HP kosong','Masukkan nomor HP yang kamu daftarkan saat service.'); return; }
+    results = orders.filter(o => o.hp.replace(/[-\s]/g,'').includes(q));
+  } else {
+    const q = document.getElementById('input-tiket').value.trim().replace('#','');
+    if (!q) { showTrackEmpty(wrap,'⚠️','Nomor tiket kosong','Masukkan nomor tiket yang kamu terima saat mendaftar.'); return; }
+    results = orders.filter(o => String(o.id).padStart(3,'0') === q.padStart(3,'0'));
+  }
+  if (results.length === 0) { showTrackEmpty(wrap,'😕','Tidak ditemukan','Data service tidak ditemukan. Pastikan nomor yang kamu masukkan sudah benar.'); return; }
+  const sorted = [...results].sort((a,b)=>b.id-a.id);
+  wrap.innerHTML = `<div style="font-size:13px;color:var(--text3);margin-bottom:14px;text-align:center">Ditemukan ${sorted.length} service</div>` + sorted.map(renderTrackCard).join('');
+}
+function renderTrackCard(o) {
+  const sc = {Antrian:'s-antrian',Proses:'s-proses',Selesai:'s-selesai'}[o.status]||'s-antrian';
+  const se = {Antrian:'⏳',Proses:'⚙️',Selesai:'✅'}[o.status];
+  const steps = ['Antrian','Proses','Selesai'];
+  const ci = steps.indexOf(o.status);
+  const tl = steps.map((s,i)=>`<div class="tl-step ${i<ci?'done':''} ${i===ci?'active':''}"><div class="tl-dot">${i<ci?'✓':['📋','🔧','✅'][i]}</div><div class="tl-label">${s}</div></div>`).join('');
+  const waMsg = encodeURIComponent(`Halo FixTech, saya ingin menanyakan status HP saya.\n\n🎫 No. Tiket: #${String(o.id).padStart(3,'0')}\n👤 Nama: ${o.nama}\n📱 ${o.merek} ${o.seri}\n\nMohon update statusnya ya, terima kasih 🙏`);
+  return `<div class="order-card">
+    <div class="order-card-header"><div><div class="order-id-text">Tiket #${String(o.id).padStart(3,'0')}</div><div class="order-date-text">📅 ${o.tanggal}</div></div><span class="status-badge ${sc}">${se} ${o.status}</span></div>
+    <div class="order-body">
+      <div class="detail-grid">
+        <div><div class="detail-label">Nama</div><div class="detail-val">${o.nama}</div></div>
+        <div><div class="detail-label">No. HP</div><div class="detail-val cyan">${o.hp}</div></div>
+        <div><div class="detail-label">Merek</div><div class="detail-val">${o.merek}</div></div>
+        <div><div class="detail-label">Seri</div><div class="detail-val">${o.seri}</div></div>
+      </div>
+      <div style="margin-bottom:12px"><div class="detail-label">Kerusakan</div><div class="detail-val" style="margin-top:4px">${o.kerusakan}</div></div>
+      ${o.deskripsi?`<div class="deskripsi-box">📝 ${o.deskripsi}</div>`:''}
+      <div class="biaya-row"><span style="font-size:13px;color:var(--text2)">Estimasi Biaya</span><span class="biaya-val">${o.biaya&&o.biaya>0?'Rp '+Number(o.biaya).toLocaleString('id'):'Menunggu konfirmasi'}</span></div>
+      <div class="timeline-wrap"><div class="timeline-lbl">Progress Perbaikan</div><div class="tl-steps">${tl}</div></div>
+      <a href="https://wa.me/${WA_NUMBER}?text=${waMsg}" target="_blank" class="btn-wa-link" style="margin-top:16px">💬 Tanya Status via WhatsApp</a>
+    </div>
+  </div>`;
+}
+function showTrackEmpty(wrap, icon, title, desc) {
+  wrap.innerHTML = `<div class="state-box"><div class="sicon">${icon}</div><h3>${title}</h3><p>${desc}</p><a href="https://wa.me/${WA_NUMBER}" target="_blank" class="btn-wa-link" style="max-width:280px;margin:20px auto 0">💬 Hubungi via WhatsApp</a></div>`;
+}
+
+/* ═══ ADMIN LOGIN ═══ */
+let loginAttempts = 0, loginLocked = false;
+function togglePw() {
+  const inp = document.getElementById('l-pass'), btn = document.getElementById('pw-toggle');
+  inp.type = inp.type==='password'?'text':'password';
+  btn.textContent = inp.type==='password'?'👁️':'🙈';
+}
+async function doLogin() {
+  if (loginLocked) return;
+  const user = document.getElementById('l-user').value.trim();
+  const pass = document.getElementById('l-pass').value;
+  const btn = document.getElementById('btn-login');
+  if (!user||!pass) { showLoginError('Mohon isi username dan password.'); return; }
+  btn.classList.add('loading'); btn.innerHTML='<span>⏳</span> Memverifikasi...';
+  await new Promise(r=>setTimeout(r,700));
+  // Kredensial: username=admin, password=fixtech2025
+  if (user==='admin' && pass==='fixtech2025') {
+    btn.innerHTML='<span>✅</span> Berhasil!';
+    sessionStorage.setItem('fixtech_admin_auth','true');
+    sessionStorage.setItem('fixtech_admin_user', user);
+    sessionStorage.setItem('fixtech_login_time', Date.now());
+    setTimeout(()=>goTo('admin-dashboard'), 700);
+  } else {
+    loginAttempts++;
+    btn.classList.remove('loading'); btn.innerHTML='<span>🔐</span> Masuk ke Dashboard';
+    document.getElementById('login-card').classList.add('shake');
+    setTimeout(()=>document.getElementById('login-card').classList.remove('shake'),400);
+    if (loginAttempts >= 5) {
+      loginLocked = true;
+      showLoginError('Terlalu banyak percobaan. Tunggu 30 detik.');
+      btn.classList.add('loading');
+      let cd = 30;
+      const t = setInterval(()=>{
+        cd--;
+        const ab = document.getElementById('attempt-badge');
+        ab.style.display='block'; ab.textContent=`Tunggu ${cd} detik...`;
+        if(cd<=0){clearInterval(t);loginLocked=false;loginAttempts=0;btn.classList.remove('loading');btn.innerHTML='<span>🔐</span> Masuk ke Dashboard';document.getElementById('login-error').classList.remove('show');ab.style.display='none';}
+      },1000);
+    } else {
+      showLoginError(`Username atau password salah. Sisa percobaan: ${5-loginAttempts}x`);
+    }
+  }
+}
+function showLoginError(msg) {
+  const e = document.getElementById('login-error');
+  document.getElementById('error-text').textContent = msg;
+  e.classList.add('show');
+}
+
+/* ═══ ADMIN DASHBOARD ═══ */
+const admTitles = {dashboard:'Dashboard',permintaan:'Permintaan Service',stok:'Stok Barang',laporan:'Laporan Keuangan'};
+let currentOrderId = null, lastOrderCount = 0;
+
+function initDashboard() {
+  if (sessionStorage.getItem('fixtech_admin_auth')!=='true') return;
+  const login = parseInt(sessionStorage.getItem('fixtech_login_time')||'0');
+  if (Date.now()-login > 2*60*60*1000) { sessionStorage.clear(); goTo('admin-login'); return; }
+  document.getElementById('admin-name-display').textContent = sessionStorage.getItem('fixtech_admin_user')||'Admin';
+  const d = new Date();
+  document.getElementById('topbar-date').textContent = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][d.getDay()]+', '+d.getDate()+' '+['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][d.getMonth()]+' '+d.getFullYear();
+  renderDashboard();
+  updateStokBadge();
+  renderNotifPanel();
+  lastOrderCount = loadOrders().length;
+}
+function doLogout() { if(confirm('Yakin mau keluar?')){ sessionStorage.clear(); goTo('landing'); } }
+
+function goAdmPage(name, navEl) {
+  document.querySelectorAll('.adm-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('adm-'+name).classList.add('active');
+  document.getElementById('page-title').textContent = admTitles[name];
+  if (navEl) navEl.classList.add('active');
+  if (name==='permintaan') renderOrders();
+  if (name==='stok') renderStok();
+  if (name==='laporan') renderLaporan();
+  if (name==='dashboard') renderDashboard();
+}
+
+function renderDashboard() {
+  const orders = loadOrders();
+  const antrian = orders.filter(o=>o.status==='Antrian').length;
+  const proses = orders.filter(o=>o.status==='Proses').length;
+  const selesai = orders.filter(o=>o.status==='Selesai').length;
+  const pendapatan = orders.filter(o=>o.status==='Selesai').reduce((s,o)=>s+(o.biaya||0),0);
+  document.getElementById('m-antrian').textContent = antrian;
+  document.getElementById('m-proses').textContent = proses;
+  document.getElementById('m-selesai').textContent = selesai;
+  document.getElementById('m-pendapatan').textContent = 'Rp '+pendapatan.toLocaleString('id');
+  document.getElementById('notif-count').textContent = antrian;
+  const tbody = document.getElementById('recent-orders-body');
+  const recent = [...orders].reverse().slice(0,5);
+  tbody.innerHTML = recent.length===0 ? `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text3)">Belum ada permintaan masuk</td></tr>` :
+    recent.map(o=>`<tr><td><div class="td-name">${o.nama}</div><div class="td-sub">${o.hp}</div></td><td>${o.merek} ${o.seri}</td><td>${o.kerusakan}</td><td style="color:var(--text3);font-size:12px">${o.tanggal}</td><td><span class="status-badge s-${o.status.toLowerCase()}">${o.status}</span></td></tr>`).join('');
+  renderBarChart('minggu');
+}
+function renderBarChart(period) {
+  const labels = period==='minggu'?['Sen','Sel','Rab','Kam','Jum','Sab','Min']:['M1','M2','M3','M4'];
+  const vals = labels.map(()=>Math.floor(Math.random()*800000)+100000);
+  const max = Math.max(...vals);
+  document.getElementById('bar-chart').innerHTML = labels.map((l,i)=>`<div class="bar-col"><div class="bar-fill ${i===labels.length-1?'active':''}" style="height:${Math.round((vals[i]/max)*120)}px" title="Rp ${vals[i].toLocaleString('id')}"></div><div class="bar-day">${l}</div></div>`).join('');
+}
+function setFilter(btn, period) { document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderBarChart(period); }
+
+function renderOrders() {
+  let orders = loadOrders();
+  const q = (document.getElementById('search-input')?.value||'').toLowerCase();
+  const fs = document.getElementById('filter-status')?.value||'';
+  if (q) orders = orders.filter(o=>o.nama.toLowerCase().includes(q)||o.hp.includes(q));
+  if (fs) orders = orders.filter(o=>o.status===fs);
+  const tbody = document.getElementById('orders-body');
+  tbody.innerHTML = orders.length===0 ? `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text3)">Tidak ada data</td></tr>` :
+    [...orders].reverse().map(o=>`<tr>
+      <td style="color:var(--text3);font-size:12px">#${String(o.id).padStart(3,'0')}</td>
+      <td><div class="td-name">${o.nama}</div><div class="td-sub">${o.alamat||'-'}</div></td>
+      <td style="color:var(--cyan)">${o.hp}</td>
+      <td>${o.merek} ${o.seri}</td>
+      <td>${o.kerusakan}</td>
+      <td><span class="status-badge s-${o.status.toLowerCase()}">${o.status}</span></td>
+      <td style="color:var(--text3);font-size:12px">${o.tanggal}</td>
+      <td><div class="action-btns"><button class="action-btn" onclick="openDetail(${o.id})">Detail</button><button class="action-btn danger" onclick="hapusOrder(${o.id})">Hapus</button></div></td>
+    </tr>`).join('');
+}
+function openDetail(id) {
+  const o = loadOrders().find(x=>x.id===id); if(!o) return;
+  currentOrderId = id;
+  document.getElementById('detail-status-select').value = o.status;
+  document.getElementById('detail-biaya').value = o.biaya||'';
+  document.getElementById('detail-content').innerHTML = [
+    ['ID','#'+String(o.id).padStart(3,'0')],['Nama',o.nama],['No. HP',o.hp],['Alamat',o.alamat||'-'],
+    ['Merek',o.merek],['Seri',o.seri],['Kerusakan',o.kerusakan],['Deskripsi',o.deskripsi||'-'],
+    ['Tanggal',o.tanggal],['Biaya',o.biaya?'Rp '+Number(o.biaya).toLocaleString('id'):'Belum ditentukan'],
+  ].map(([l,v])=>`<div class="detail-row"><span class="detail-row-label">${l}</span><span class="detail-row-val">${v}</span></div>`).join('');
+  openModal('modal-detail');
+}
+function updateStatus() {
+  if (!currentOrderId) return;
+  const orders = loadOrders();
+  const idx = orders.findIndex(x=>x.id===currentOrderId); if(idx<0) return;
+  orders[idx].status = document.getElementById('detail-status-select').value;
+  orders[idx].biaya = parseInt(document.getElementById('detail-biaya').value)||0;
+  saveOrders(orders);
+  closeModal('modal-detail');
+  showToast('success','✅ Status berhasil diperbarui!');
+  renderDashboard();
+  if(document.getElementById('adm-permintaan').classList.contains('active')) renderOrders();
+}
+function hapusOrder(id) {
+  if (!confirm('Yakin hapus?')) return;
+  saveOrders(loadOrders().filter(o=>o.id!==id));
+  renderOrders(); renderDashboard();
+  showToast('error','🗑️ Permintaan dihapus');
+}
+function tambahOrder() {
+  const nama=document.getElementById('to-nama').value.trim();
+  const hp=document.getElementById('to-hp').value.trim();
+  const merek=document.getElementById('to-merek').value;
+  const seri=document.getElementById('to-seri').value.trim();
+  const kerusakan=document.getElementById('to-kerusakan').value;
+  if(!nama||!hp||!merek||!seri||!kerusakan){showToast('error','⚠️ Lengkapi field wajib');return;}
+  const orders=loadOrders();
+  orders.push({id:nextId(),nama,hp,alamat:document.getElementById('to-alamat').value.trim(),merek,seri,kerusakan,deskripsi:document.getElementById('to-deskripsi').value.trim(),status:'Antrian',biaya:0,tanggal:new Date().toLocaleDateString('id-ID'),sumber:'Manual Admin'});
+  saveOrders(orders);
+  closeModal('modal-tambah-order');
+  renderOrders(); renderDashboard();
+  showToast('success','✅ Permintaan ditambahkan!');
+}
+
+function renderStok() {
+  const stok=loadStok();
+  const low=stok.filter(s=>s.qty<=s.min);
+  const alertEl=document.getElementById('stok-alert');
+  if(low.length>0){alertEl.style.display='flex';document.getElementById('stok-alert-text').textContent=`${low.length} barang hampir habis: ${low.map(s=>s.nama).join(', ')}`;}
+  else{alertEl.style.display='none';}
+  document.getElementById('stok-grid').innerHTML=stok.map(s=>`
+    <div class="stok-card ${s.qty<=s.min?'low':''}">
+      <div class="stok-icon">${s.icon||'📦'}</div>
+      <div class="stok-name">${s.nama}</div>
+      <div class="stok-cat">${s.kategori}</div>
+      <div class="stok-qty-row">
+        <div><div class="stok-qty ${s.qty<=s.min?'low':'ok'}">${s.qty}</div><div class="stok-unit">unit tersedia</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+          <button class="action-btn" onclick="editStok(${s.id})">Edit</button>
+          <button class="action-btn danger" onclick="hapusStok(${s.id})">Hapus</button>
+        </div>
+      </div>
+      ${s.qty<=s.min?`<div class="stok-warn">⚠️ Stok menipis! Min: ${s.min}</div>`:''}
+      ${s.harga?`<div style="font-size:11px;color:var(--text3);margin-top:8px">Harga beli: Rp ${Number(s.harga).toLocaleString('id')}</div>`:''}
+    </div>`).join('');
+}
+function openTambahStok(){document.getElementById('stok-edit-id').value='';['ts-nama','ts-qty','ts-min','ts-harga','ts-icon'].forEach(id=>document.getElementById(id).value='');document.getElementById('ts-kategori').value='LCD / Layar';openModal('modal-tambah-stok');}
+function editStok(id){const s=loadStok().find(x=>x.id===id);if(!s)return;document.getElementById('stok-edit-id').value=id;document.getElementById('ts-nama').value=s.nama;document.getElementById('ts-kategori').value=s.kategori;document.getElementById('ts-icon').value=s.icon||'';document.getElementById('ts-qty').value=s.qty;document.getElementById('ts-min').value=s.min;document.getElementById('ts-harga').value=s.harga||'';openModal('modal-tambah-stok');}
+function simpanStok(){
+  const nama=document.getElementById('ts-nama').value.trim();
+  const qty=parseInt(document.getElementById('ts-qty').value);
+  if(!nama||isNaN(qty)){showToast('error','⚠️ Lengkapi nama dan jumlah');return;}
+  const stok=loadStok();
+  const editId=document.getElementById('stok-edit-id').value;
+  const item={nama,kategori:document.getElementById('ts-kategori').value,icon:document.getElementById('ts-icon').value||'📦',qty,min:parseInt(document.getElementById('ts-min').value)||5,harga:parseInt(document.getElementById('ts-harga').value)||0};
+  if(editId){const idx=stok.findIndex(x=>x.id===parseInt(editId));stok[idx]={...stok[idx],...item};}
+  else{item.id=stok.length?Math.max(...stok.map(s=>s.id))+1:1;stok.push(item);}
+  saveStok(stok);closeModal('modal-tambah-stok');renderStok();updateStokBadge();showToast('success','✅ Stok berhasil disimpan!');
+}
+function hapusStok(id){if(!confirm('Yakin hapus barang ini?'))return;saveStok(loadStok().filter(s=>s.id!==id));renderStok();updateStokBadge();showToast('error','🗑️ Barang dihapus');}
+
+function renderLaporan() {
+  const selesai=loadOrders().filter(o=>o.status==='Selesai');
+  const totalBulan=selesai.reduce((s,o)=>s+(o.biaya||0),0);
+  const totalMinggu=selesai.slice(-7).reduce((s,o)=>s+(o.biaya||0),0);
+  document.getElementById('lap-minggu').textContent='Rp '+totalMinggu.toLocaleString('id');
+  document.getElementById('lap-minggu-count').textContent=`${Math.min(selesai.length,7)} order selesai`;
+  document.getElementById('lap-bulan').textContent='Rp '+totalBulan.toLocaleString('id');
+  document.getElementById('lap-bulan-count').textContent=`${selesai.length} order selesai`;
+  const tbody=document.getElementById('laporan-body');
+  tbody.innerHTML=selesai.length===0?`<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text3)">Belum ada transaksi selesai</td></tr>`:
+    [...selesai].reverse().map(o=>`<tr><td><div class="td-name">${o.nama}</div></td><td>${o.merek} ${o.seri}</td><td>${o.kerusakan}</td><td style="color:var(--text3);font-size:12px">${o.tanggal}</td><td style="color:var(--green);font-weight:600">Rp ${(o.biaya||0).toLocaleString('id')}</td></tr>`).join('');
+}
+
+function renderNotifPanel() {
+  const notifs=loadNotifs();
+  const unread=notifs.filter(n=>!n.read).length;
+  const dot=document.getElementById('notif-dot');
+  if(dot) dot.style.display=unread>0?'block':'none';
+  const list=document.getElementById('notif-list');
+  if(!list) return;
+  list.innerHTML=notifs.length===0?`<div style="padding:24px;text-align:center;color:var(--text3);font-size:13px">Tidak ada notifikasi</div>`:
+    notifs.slice(0,10).map(n=>`<div class="notif-item ${n.read?'':'unread'}"><span style="font-size:18px;flex-shrink:0">📋</span><div style="flex:1"><div class="notif-item-name">${n.nama} — ${n.kerusakan}</div><div class="notif-item-sub">${n.merek} ${n.seri} · ${n.tanggal}</div></div><span class="notif-item-id">#${String(n.id).padStart(3,'0')}</span></div>`).join('');
+  const updated=notifs.map(n=>({...n,read:true}));
+  localStorage.setItem('fixtech_notifs',JSON.stringify(updated));
+  if(dot) dot.style.display='none';
+}
+function toggleNotifPanel(){const p=document.getElementById('notif-panel');const open=p.style.display!=='none'&&p.style.display!=='';p.style.display=open?'none':'block';if(!open)renderNotifPanel();}
+function clearNotifs(){localStorage.removeItem('fixtech_notifs');renderNotifPanel();document.getElementById('notif-panel').style.display='none';}
+document.addEventListener('click',e=>{
+  const panel=document.getElementById('notif-panel');
+  const btn=document.getElementById('notif-btn');
+  if(panel&&btn&&!panel.contains(e.target)&&!btn.contains(e.target)) panel.style.display='none';
+});
+function updateStokBadge(){const low=loadStok().filter(s=>s.qty<=s.min).length;const b=document.getElementById('stok-warn-count');if(b){b.style.display=low>0?'inline-flex':'none';b.textContent=low;}}
+
+// Auto-refresh
+setInterval(()=>{
+  if(document.getElementById('view-admin-dashboard').classList.contains('active')){
+    const orders=loadOrders();
+    document.getElementById('notif-count').textContent=orders.filter(o=>o.status==='Antrian').length;
+    if(orders.length>lastOrderCount&&lastOrderCount>0){
+      showToast('success',`🔔 Ada ${orders.length-lastOrderCount} permintaan baru!`);
+      renderDashboard();
+      const dot=document.getElementById('notif-dot');
+      if(dot&&loadNotifs().some(n=>!n.read)) dot.style.display='block';
+    }
+    lastOrderCount=orders.length;
+    updateStokBadge();
+  }
+},30000);
+
+// Storage sync antar tab
+window.addEventListener('storage',e=>{
+  if(e.key==='fixtech_orders'||e.key==='fixtech_notifs'){
+    if(document.getElementById('view-admin-dashboard').classList.contains('active')){
+      renderDashboard();
+      if(document.getElementById('adm-permintaan').classList.contains('active')) renderOrders();
+      if(document.getElementById('adm-laporan').classList.contains('active')) renderLaporan();
+      renderNotifPanel();
+    }
+  }
+});
+</script>
+</body>
+</html>
