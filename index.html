@@ -28,14 +28,32 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");opacity:0.4}
 
 /* ── PAGE SYSTEM ── */
-.page-view{display:none;min-height:100vh}
-.page-view.active{display:block}
-/* Admin layout exception */
-#view-admin-dashboard.active{display:flex}
+.page-view {
+  display: none;
+  min-height: 100vh;
+  position: relative;
+}
+.page-view.active {
+  display: block;
+}
+#view-admin-login.active {
+  display: flex; /* Override untuk centering */
+  align-items: center;
+  justify-content: center;
+}
+#view-admin-dashboard.active {
+  display: flex; /* Override untuk layout dashboard */
+}
 
-.orb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
-.orb1{width:600px;height:600px;background:rgba(0,212,255,0.06);top:-200px;left:-200px}
-.orb2{width:400px;height:400px;background:rgba(0,212,255,0.04);bottom:100px;right:-100px}
+/* Force hide background effects when in Admin */
+.page-view.active.admin-mode ~ .orb, 
+body.admin-mode .orb {
+  display: none !important;
+}
+body.admin-mode::before {
+  display: none;
+}
+
 
 /* ── ANIMATIONS ── */
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
@@ -583,10 +601,13 @@ tbody td{padding:14px 22px;font-size:13px}
       <p>Platform service HP profesional yang menghubungkan pelanggan dan teknisi dengan mudah, cepat, dan transparan.</p>
     </div>
     <div class="footer-col"><h4>Layanan</h4><a>Ganti LCD</a><a>Ganti Baterai</a><a>Kena Air</a><a>Ganti Kamera</a><a>Mati Total</a></div>
-    <div class="footer-col"><h4>Navigasi</h4><a onclick="goTo('tracking')">Cek Status HP</a><a onclick="goTo('admin-login')">Login Admin</a><a onclick="scrollTo2('services')">Layanan</a><a onclick="scrollTo2('order')">Pesan Service</a></div>
+    <div class="footer-col"><h4>Navigasi</h4><a onclick="goTo('tracking')">Cek Status HP</a><a onclick="scrollTo2('services')">Layanan</a><a onclick="scrollTo2('order')">Pesan Service</a><a onclick="scrollTo2('how')">Cara Kerja</a></div>
     <div class="footer-col"><h4>Legal</h4><a>Syarat & Ketentuan</a><a>Kebijakan Privasi</a><a>Garansi Service</a></div>
   </div>
-  <div class="footer-bottom"><span>© 2025 FixTech. Semua hak dilindungi.</span><span>Dibuat dengan ❤️ untuk teknisi Indonesia</span></div>
+  <div class="footer-bottom">
+    <span id="copyright-click" style="cursor:default;user-select:none" onclick="secretClick()" title="">© 2025 FixTech. Semua hak dilindungi.</span>
+    <span>Dibuat dengan ❤️ untuk teknisi Indonesia</span>
+  </div>
 </footer>
 
 <!-- SUCCESS MODAL -->
@@ -637,7 +658,7 @@ tbody td{padding:14px 22px;font-size:13px}
 <!-- ████████████████████████████████████
      PAGE 3 — ADMIN LOGIN
 ████████████████████████████████████ -->
-<div class="page-view" id="view-admin-login" style="display:none;min-height:100vh;align-items:center;justify-content:center;padding:24px">
+<div class="page-view" id="view-admin-login">
   <div class="login-wrap">
     <div class="login-logo">
       <div class="login-logo-icon">🔧</div>
@@ -665,40 +686,47 @@ tbody td{padding:14px 22px;font-size:13px}
 <!-- ████████████████████████████████████
      PAGE 4 — ADMIN DASHBOARD
 ████████████████████████████████████ -->
-<div class="page-view" id="view-admin-dashboard">
+<div class="page-view" id="view-admin-dashboard" style="display:none">
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <div class="sidebar-logo" onclick="goTo('landing')">
+    <div class="sidebar-logo">
       <div class="logo-icon" style="width:34px;height:34px;font-size:16px">🔧</div>
       <span class="logo-text-s">Fix<span>Tech</span></span>
       <span class="sidebar-badge">Admin</span>
     </div>
     <div class="nav-section">
-      <div class="nav-label">Menu Utama</div>
-      <button class="nav-item active" onclick="goAdmPage('dashboard',this)"><span class="icon">📊</span> Dashboard</button>
-      <button class="nav-item" onclick="goAdmPage('permintaan',this)"><span class="icon">📋</span> Permintaan Service<span class="badge-count" id="notif-count">0</span></button>
-      <button class="nav-item" onclick="goAdmPage('stok',this)"><span class="icon">📦</span> Stok Barang<span class="badge-count" id="stok-warn-count" style="display:none;background:var(--yellow);color:#000">0</span></button>
-      <button class="nav-item" onclick="goAdmPage('laporan',this)"><span class="icon">💰</span> Laporan Keuangan</button>
-      <div class="nav-label" style="margin-top:20px">Halaman Lain</div>
-      <button class="nav-item" onclick="goTo('tracking')"><span class="icon">🔍</span> Halaman Tracking</button>
-      <button class="nav-item" onclick="goTo('landing')"><span class="icon">🌐</span> Landing Page</button>
+      <div class="nav-label">Menu</div>
+      <button class="nav-item active" id="nav-dashboard" onclick="goAdmPage('dashboard',this)"><span class="icon">📊</span> Dashboard</button>
+      <button class="nav-item" id="nav-pesanan" onclick="goAdmPage('pesanan',this)"><span class="icon">📋</span> Pesanan Service<span class="badge-count" id="notif-count" style="display:none">0</span></button>
+      <button class="nav-item" id="nav-keuangan" onclick="goAdmPage('keuangan',this)"><span class="icon">💰</span> Keuangan & Omset</button>
+      <button class="nav-item" id="nav-stok" onclick="goAdmPage('stok',this)"><span class="icon">📦</span> Stok Sparepart<span class="badge-count" id="stok-warn-count" style="display:none;background:var(--yellow);color:#000">!</span></button>
+      <div class="nav-label" style="margin-top:20px">Data</div>
+      <button class="nav-item" onclick="exportData()"><span class="icon">💾</span> Backup Data</button>
+      <button class="nav-item" onclick="document.getElementById('import-file').click()"><span class="icon">📂</span> Restore Data</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
     </div>
     <div class="sidebar-footer">
-      <div class="admin-info"><div class="admin-avatar">👤</div><div><div class="admin-name-t" id="admin-name-display">Admin</div><div class="admin-role-t">Pemilik Toko</div></div></div>
+      <div class="admin-info">
+        <div class="admin-avatar">👤</div>
+        <div><div class="admin-name-t" id="admin-name-display">Admin</div><div class="admin-role-t">Pemilik Toko</div></div>
+      </div>
       <button class="btn-logout" onclick="doLogout()">🚪 Keluar</button>
     </div>
   </aside>
 
   <!-- MAIN -->
   <div class="adm-main">
+    <!-- TOPBAR -->
     <div class="topbar">
       <div class="topbar-title" id="page-title">Dashboard</div>
       <div class="topbar-right">
         <div class="topbar-date" id="topbar-date"></div>
         <div style="position:relative">
-          <div class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()">🔔<div class="notif-dot" id="notif-dot" style="display:none"></div></div>
+          <div class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()">🔔
+            <div class="notif-dot" id="notif-dot" style="display:none"></div>
+          </div>
           <div class="notif-panel" id="notif-panel">
-            <div class="notif-panel-header"><span class="notif-panel-title">Notifikasi</span><button class="notif-clear" onclick="clearNotifs()">Hapus semua</button></div>
+            <div class="notif-panel-header"><span class="notif-panel-title">Order Baru</span><button class="notif-clear" onclick="clearNotifs()">Hapus semua</button></div>
             <div class="notif-list" id="notif-list"></div>
           </div>
         </div>
@@ -707,79 +735,187 @@ tbody td{padding:14px 22px;font-size:13px}
 
     <div class="adm-content">
 
-      <!-- DASHBOARD -->
+      <!-- ══ DASHBOARD ══ -->
       <div class="adm-page active" id="adm-dashboard">
+        <!-- Metric Cards -->
         <div class="metrics-grid">
-          <div class="metric-card cyan"><div class="metric-top"><span class="metric-icon">📋</span><span class="metric-change up">Antrian</span></div><div class="metric-num" id="m-antrian">0</div><div class="metric-label">Permintaan Masuk</div></div>
-          <div class="metric-card yellow"><div class="metric-top"><span class="metric-icon">⚙️</span><span class="metric-change up">Dikerjakan</span></div><div class="metric-num" id="m-proses">0</div><div class="metric-label">Sedang Diproses</div></div>
-          <div class="metric-card green"><div class="metric-top"><span class="metric-icon">✅</span><span class="metric-change up">Bulan ini</span></div><div class="metric-num" id="m-selesai">0</div><div class="metric-label">Selesai</div></div>
-          <div class="metric-card red"><div class="metric-top"><span class="metric-icon">💰</span><span class="metric-change up">↑ Total</span></div><div class="metric-num" id="m-pendapatan">Rp 0</div><div class="metric-label">Pendapatan</div></div>
+          <div class="metric-card cyan">
+            <div class="metric-top"><span class="metric-icon">📋</span><span class="metric-change up" id="mc-antrian-badge">Menunggu</span></div>
+            <div class="metric-num" id="mc-antrian">0</div>
+            <div class="metric-label">Antrian Masuk</div>
+          </div>
+          <div class="metric-card yellow">
+            <div class="metric-top"><span class="metric-icon">⚙️</span><span class="metric-change up">Dikerjakan</span></div>
+            <div class="metric-num" id="mc-proses">0</div>
+            <div class="metric-label">Sedang Diproses</div>
+          </div>
+          <div class="metric-card green">
+            <div class="metric-top"><span class="metric-icon">✅</span><span class="metric-change up">Hari ini</span></div>
+            <div class="metric-num" id="mc-selesai-hari">0</div>
+            <div class="metric-label">Selesai Hari Ini</div>
+          </div>
+          <div class="metric-card red">
+            <div class="metric-top"><span class="metric-icon">💰</span><span class="metric-change up">Hari ini</span></div>
+            <div class="metric-num" id="mc-omset-hari">Rp 0</div>
+            <div class="metric-label">Omset Hari Ini</div>
+          </div>
         </div>
+
+        <!-- Omset Summary Row -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px">
+          <div class="chart-card" style="padding:20px">
+            <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Omset Minggu Ini</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;color:var(--cyan)" id="mc-omset-minggu">Rp 0</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:4px" id="mc-omset-minggu-count">0 order selesai</div>
+          </div>
+          <div class="chart-card" style="padding:20px">
+            <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Omset Bulan Ini</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;color:var(--cyan)" id="mc-omset-bulan">Rp 0</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:4px" id="mc-omset-bulan-count">0 order selesai</div>
+          </div>
+          <div class="chart-card" style="padding:20px">
+            <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Total Omset Semua</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;color:var(--green)" id="mc-omset-total">Rp 0</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:4px" id="mc-omset-total-count">0 order selesai</div>
+          </div>
+        </div>
+
+        <!-- Grafik + Stok Warning -->
         <div class="charts-row">
           <div class="chart-card">
-            <div class="chart-header"><span class="chart-title">Pendapatan Harian</span><div class="chart-filter"><button class="filter-btn active" onclick="setFilter(this,'minggu')">Minggu</button><button class="filter-btn" onclick="setFilter(this,'bulan')">Bulan</button></div></div>
-            <div class="bar-chart-wrap" id="bar-chart"></div>
-          </div>
-          <div class="chart-card">
-            <div class="chart-header"><span class="chart-title">Jenis Kerusakan</span></div>
-            <div class="donut-wrap">
-              <svg class="donut-svg" viewBox="0 0 120 120">
-                <circle cx="60" cy="60" r="45" fill="none" stroke="#16161F" stroke-width="18"/>
-                <circle cx="60" cy="60" r="45" fill="none" stroke="#00D4FF" stroke-width="18" stroke-dasharray="113 170" stroke-dashoffset="0" stroke-linecap="round"/>
-                <circle cx="60" cy="60" r="45" fill="none" stroke="#00FF88" stroke-width="18" stroke-dasharray="57 226" stroke-dashoffset="-113" stroke-linecap="round"/>
-                <circle cx="60" cy="60" r="45" fill="none" stroke="#FFC400" stroke-width="18" stroke-dasharray="40 243" stroke-dashoffset="-170" stroke-linecap="round"/>
-                <circle cx="60" cy="60" r="45" fill="none" stroke="#FF4466" stroke-width="18" stroke-dasharray="73 210" stroke-dashoffset="-210" stroke-linecap="round"/>
-              </svg>
-              <div class="donut-legend">
-                <div class="legend-item"><div class="legend-dot" style="background:var(--cyan)"></div><span class="legend-label">LCD / Layar</span><span class="legend-val">40%</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div><span class="legend-label">Baterai</span><span class="legend-val">20%</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div><span class="legend-label">Charging</span><span class="legend-val">15%</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div><span class="legend-label">Lainnya</span><span class="legend-val">25%</span></div>
+            <div class="chart-header">
+              <span class="chart-title">Grafik Omset</span>
+              <div class="chart-filter">
+                <button class="filter-btn active" onclick="setChartPeriod(this,'7')">7 Hari</button>
+                <button class="filter-btn" onclick="setChartPeriod(this,'30')">30 Hari</button>
               </div>
             </div>
+            <div class="bar-chart-wrap" id="bar-chart" style="height:160px"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><span class="chart-title">⚠️ Stok Menipis</span></div>
+            <div id="stok-warning-list" style="display:flex;flex-direction:column;gap:8px"></div>
           </div>
         </div>
-        <div class="table-card">
-          <div class="table-header"><span class="table-title">Permintaan Terbaru</span><button class="btn-sm" onclick="goAdmPage('permintaan',null)">Lihat Semua →</button></div>
-          <table><thead><tr><th>Pelanggan</th><th>Perangkat</th><th>Kerusakan</th><th>Waktu</th><th>Status</th></tr></thead><tbody id="recent-orders-body"></tbody></table>
-        </div>
-      </div>
 
-      <!-- PERMINTAAN -->
-      <div class="adm-page" id="adm-permintaan">
+        <!-- Pesanan terbaru -->
         <div class="table-card">
           <div class="table-header">
-            <span class="table-title">Semua Permintaan Service</span>
-            <div class="table-actions">
-              <input class="search-input-adm" type="text" placeholder="🔍 Cari nama / HP..." id="search-input" oninput="renderOrders()">
-              <select class="btn-sm" id="filter-status" onchange="renderOrders()" style="cursor:pointer"><option value="">Semua Status</option><option value="Antrian">Antrian</option><option value="Proses">Proses</option><option value="Selesai">Selesai</option></select>
-              <button class="btn-sm primary" onclick="openModal('modal-tambah-order')">+ Tambah Manual</button>
-            </div>
+            <span class="table-title">Pesanan Terbaru</span>
+            <button class="btn-sm" onclick="goAdmPage('pesanan',document.getElementById('nav-pesanan'))">Lihat Semua →</button>
           </div>
-          <table><thead><tr><th>#</th><th>Pelanggan</th><th>No. HP</th><th>Perangkat</th><th>Kerusakan</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead><tbody id="orders-body"></tbody></table>
+          <table>
+            <thead><tr><th>Tiket</th><th>Pelanggan</th><th>Perangkat</th><th>Kerusakan</th><th>Masuk</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="recent-orders-body"></tbody>
+          </table>
         </div>
       </div>
 
-      <!-- STOK -->
-      <div class="adm-page" id="adm-stok">
-        <div class="stok-header">
-          <div><h2 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:4px">Manajemen Stok</h2><p style="font-size:13px;color:var(--text3)">Pantau dan kelola stok spare part kamu</p></div>
-          <button class="btn-sm primary" onclick="openTambahStok()">+ Tambah Barang</button>
+      <!-- ══ PESANAN SERVICE ══ -->
+      <div class="adm-page" id="adm-pesanan">
+        <!-- Filter bar -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+          <input class="search-input-adm" type="text" placeholder="🔍 Cari nama / HP / tiket..." id="search-input" oninput="renderPesanan()" style="flex:1;min-width:200px">
+          <select class="btn-sm" id="filter-status" onchange="renderPesanan()" style="cursor:pointer;padding:8px 12px">
+            <option value="">Semua Status</option>
+            <option value="Antrian">Antrian</option>
+            <option value="Proses">Proses</option>
+            <option value="Selesai">Selesai</option>
+          </select>
+          <button class="btn-sm primary" onclick="openModal('modal-tambah-pesanan')">+ Tambah Manual</button>
         </div>
-        <div id="stok-alert" style="display:none;background:var(--red-dim);border:1px solid rgba(255,68,102,0.3);border-radius:var(--radius2);padding:14px 18px;margin-bottom:20px;font-size:13px;color:var(--red);align-items:center;gap:10px">⚠️ <span id="stok-alert-text"></span></div>
-        <div class="stok-grid" id="stok-grid"></div>
-      </div>
-
-      <!-- LAPORAN -->
-      <div class="adm-page" id="adm-laporan">
-        <div class="laporan-grid">
-          <div class="period-card"><div class="period-title">📅 MINGGU INI</div><div class="period-amount" id="lap-minggu">Rp 0</div><div class="period-sub" id="lap-minggu-count">0 order selesai</div></div>
-          <div class="period-card"><div class="period-title">🗓️ BULAN INI</div><div class="period-amount" id="lap-bulan">Rp 0</div><div class="period-sub" id="lap-bulan-count">0 order selesai</div></div>
+        <!-- Status tabs -->
+        <div style="display:flex;gap:8px;margin-bottom:20px">
+          <button class="stab-status active" onclick="filterStatusTab('',this)">Semua (<span id="tab-count-all">0</span>)</button>
+          <button class="stab-status" onclick="filterStatusTab('Antrian',this)">⏳ Antrian (<span id="tab-count-antrian">0</span>)</button>
+          <button class="stab-status" onclick="filterStatusTab('Proses',this)">⚙️ Proses (<span id="tab-count-proses">0</span>)</button>
+          <button class="stab-status" onclick="filterStatusTab('Selesai',this)">✅ Selesai (<span id="tab-count-selesai">0</span>)</button>
         </div>
         <div class="table-card">
-          <div class="table-header"><span class="table-title">Riwayat Transaksi Selesai</span></div>
-          <table><thead><tr><th>Pelanggan</th><th>Perangkat</th><th>Kerusakan</th><th>Tanggal</th><th>Biaya</th></tr></thead><tbody id="laporan-body"></tbody></table>
+          <table>
+            <thead><tr><th>Tiket</th><th>Pelanggan</th><th>No. HP</th><th>Perangkat</th><th>Kerusakan</th><th>Masuk</th><th>Status</th><th>Biaya</th><th>Aksi</th></tr></thead>
+            <tbody id="orders-body"></tbody>
+          </table>
         </div>
+      </div>
+
+      <!-- ══ KEUANGAN & OMSET ══ -->
+      <div class="adm-page" id="adm-keuangan">
+        <!-- Period selector -->
+        <div style="display:flex;gap:8px;margin-bottom:24px;align-items:center;flex-wrap:wrap">
+          <span style="font-size:13px;color:var(--text2)">Tampilkan periode:</span>
+          <button class="filter-btn active" onclick="setLaporanPeriod('hari',this)">Hari Ini</button>
+          <button class="filter-btn" onclick="setLaporanPeriod('minggu',this)">Minggu Ini</button>
+          <button class="filter-btn" onclick="setLaporanPeriod('bulan',this)">Bulan Ini</button>
+          <button class="filter-btn" onclick="setLaporanPeriod('semua',this)">Semua Waktu</button>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <input type="date" id="filter-tgl-dari" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none">
+            <span style="color:var(--text3);line-height:2">s/d</span>
+            <input type="date" id="filter-tgl-sampai" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none">
+            <button class="btn-sm" onclick="setLaporanPeriod('custom',null)">Filter</button>
+          </div>
+        </div>
+        <!-- Omset cards -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">
+          <div class="metric-card green">
+            <div class="metric-top"><span class="metric-icon">💰</span></div>
+            <div class="metric-num" id="lap-total-omset" style="font-size:22px">Rp 0</div>
+            <div class="metric-label">Total Omset</div>
+          </div>
+          <div class="metric-card cyan">
+            <div class="metric-top"><span class="metric-icon">✅</span></div>
+            <div class="metric-num" id="lap-total-order">0</div>
+            <div class="metric-label">Order Selesai</div>
+          </div>
+          <div class="metric-card yellow">
+            <div class="metric-top"><span class="metric-icon">📊</span></div>
+            <div class="metric-num" id="lap-rata-rata" style="font-size:22px">Rp 0</div>
+            <div class="metric-label">Rata-rata per Order</div>
+          </div>
+          <div class="metric-card red">
+            <div class="metric-top"><span class="metric-icon">🏆</span></div>
+            <div class="metric-num" id="lap-tertinggi" style="font-size:22px">Rp 0</div>
+            <div class="metric-label">Order Tertinggi</div>
+          </div>
+        </div>
+        <!-- Grafik omset -->
+        <div class="chart-card" style="margin-bottom:24px">
+          <div class="chart-header"><span class="chart-title">Grafik Omset Harian</span></div>
+          <div class="bar-chart-wrap" id="bar-chart-lap" style="height:160px;padding:0 8px"></div>
+        </div>
+        <!-- Tabel transaksi -->
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-title">Riwayat Transaksi Selesai</span>
+            <button class="btn-sm" onclick="exportCSV()">⬇️ Export CSV</button>
+          </div>
+          <table>
+            <thead><tr><th>Tiket</th><th>Pelanggan</th><th>Perangkat</th><th>Kerusakan</th><th>Tanggal Selesai</th><th>Biaya</th></tr></thead>
+            <tbody id="laporan-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ STOK SPAREPART ══ -->
+      <div class="adm-page" id="adm-stok">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+          <div>
+            <h2 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:4px">Manajemen Stok Sparepart</h2>
+            <p style="font-size:13px;color:var(--text3)">Pantau ketersediaan sparepart dan kelola stok toko</p>
+          </div>
+          <div style="display:flex;gap:8px">
+            <input class="search-input-adm" type="text" placeholder="🔍 Cari barang..." id="stok-search" oninput="renderStok()">
+            <button class="btn-sm primary" onclick="openTambahStok()">+ Tambah Barang</button>
+          </div>
+        </div>
+        <div id="stok-alert" style="display:none;background:var(--red-dim);border:1px solid rgba(255,68,102,0.3);border-radius:var(--radius2);padding:14px 18px;margin-bottom:20px;font-size:13px;color:var(--red);align-items:center;gap:10px">⚠️ <span id="stok-alert-text"></span></div>
+        <!-- Stok summary -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px">
+          <div class="chart-card" style="padding:18px"><div style="font-size:11px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">Total Jenis Barang</div><div style="font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700" id="stok-total-jenis">0</div></div>
+          <div class="chart-card" style="padding:18px"><div style="font-size:11px;color:var(--red);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">Stok Menipis</div><div style="font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;color:var(--red)" id="stok-total-menipis">0</div></div>
+          <div class="chart-card" style="padding:18px"><div style="font-size:11px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">Nilai Total Stok</div><div style="font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;color:var(--cyan)" id="stok-nilai-total">Rp 0</div></div>
+        </div>
+        <div class="stok-grid" id="stok-grid"></div>
       </div>
 
     </div><!-- /adm-content -->
@@ -787,56 +923,86 @@ tbody td{padding:14px 22px;font-size:13px}
 </div><!-- /view-admin-dashboard -->
 
 <!-- ═══ MODALS ═══ -->
-<!-- Detail Order -->
+<!-- Detail & Update Pesanan -->
 <div class="modal-overlay" id="modal-detail">
   <div class="modal-box">
     <button class="modal-close-btn" onclick="closeModal('modal-detail')">✕</button>
-    <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:20px">📋 Detail Permintaan</h3>
+    <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:20px">📋 Detail Pesanan</h3>
     <div id="detail-content"></div>
-    <div style="display:flex;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
-      <select class="status-select" id="detail-status-select" style="flex:1;padding:10px 14px;border-radius:var(--radius)"><option value="Antrian">Antrian</option><option value="Proses">Proses</option><option value="Selesai">Selesai</option></select>
-      <input type="number" id="detail-biaya" placeholder="Biaya (Rp)" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
-      <button class="btn-sm primary" onclick="updateStatus()">Simpan</button>
+    <div style="background:var(--bg3);border-radius:var(--radius);padding:16px;margin-top:16px">
+      <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px">Update Pesanan</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div>
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">Status</label>
+          <select class="status-select" id="detail-status-select" style="width:100%;padding:9px 12px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--card);color:var(--text);font-family:'DM Sans',sans-serif">
+            <option value="Antrian">⏳ Antrian</option>
+            <option value="Proses">⚙️ Proses</option>
+            <option value="Selesai">✅ Selesai</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">Biaya Service (Rp)</label>
+          <input type="number" id="detail-biaya" placeholder="Contoh: 150000" style="width:100%;background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
+        </div>
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">Catatan Teknisi</label>
+        <textarea id="detail-catatan" placeholder="Catatan hasil service, komponen yang diganti, dll..." style="width:100%;background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:vertical;min-height:70px"></textarea>
+      </div>
+      <button class="btn-sm primary" style="width:100%;padding:11px;font-size:14px" onclick="updatePesanan()">💾 Simpan Perubahan</button>
     </div>
   </div>
 </div>
 
-<!-- Tambah Order -->
-<div class="modal-overlay" id="modal-tambah-order">
+<!-- Tambah Pesanan Manual -->
+<div class="modal-overlay" id="modal-tambah-pesanan">
   <div class="modal-box">
-    <button class="modal-close-btn" onclick="closeModal('modal-tambah-order')">✕</button>
-    <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:20px">➕ Tambah Permintaan Manual</h3>
-    <div class="form-group"><label>Nama Pelanggan *</label><input type="text" id="to-nama" placeholder="Nama pelanggan"></div>
+    <button class="modal-close-btn" onclick="closeModal('modal-tambah-pesanan')">✕</button>
+    <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:20px">➕ Tambah Pesanan Manual</h3>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="form-group"><label>No. HP *</label><input type="text" id="to-hp" placeholder="08xx-xxxx-xxxx"></div>
-      <div class="form-group"><label>Alamat</label><input type="text" id="to-alamat" placeholder="Alamat"></div>
+      <div class="form-group"><label>Nama Pelanggan *</label><input type="text" id="tp-nama" placeholder="Nama pelanggan"></div>
+      <div class="form-group"><label>No. HP *</label><input type="text" id="tp-hp" placeholder="08xx-xxxx-xxxx"></div>
     </div>
+    <div class="form-group"><label>Alamat</label><input type="text" id="tp-alamat" placeholder="Alamat pelanggan"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="form-group"><label>Merek HP *</label><select id="to-merek"><option value="">Pilih merek...</option><option>Samsung</option><option>iPhone / Apple</option><option>Xiaomi</option><option>OPPO</option><option>Vivo</option><option>Realme</option><option>Lainnya</option></select></div>
-      <div class="form-group"><label>Seri HP *</label><input type="text" id="to-seri" placeholder="cth: Galaxy S23"></div>
+      <div class="form-group"><label>Merek HP *</label>
+        <select id="tp-merek"><option value="">Pilih merek...</option><option>Samsung</option><option>iPhone / Apple</option><option>Xiaomi</option><option>OPPO</option><option>Vivo</option><option>Realme</option><option>Huawei</option><option>Asus</option><option>Lainnya</option></select>
+      </div>
+      <div class="form-group"><label>Seri HP *</label><input type="text" id="tp-seri" placeholder="cth: Galaxy S23"></div>
     </div>
-    <div class="form-group"><label>Jenis Kerusakan *</label><select id="to-kerusakan"><option value="">Pilih kerusakan...</option><option>LCD / Layar Retak</option><option>LCD / Layar Mati</option><option>Baterai Boros</option><option>Tidak Bisa Charge</option><option>Kemasukan Air</option><option>Kamera Bermasalah</option><option>Tidak Ada Sinyal</option><option>Mati Total</option><option>Lainnya</option></select></div>
-    <div class="form-group"><label>Deskripsi</label><textarea id="to-deskripsi" placeholder="Deskripsi kerusakan..."></textarea></div>
-    <button class="btn-sm primary" style="width:100%;padding:12px;font-size:14px" onclick="tambahOrder()">Simpan Permintaan</button>
+    <div class="form-group"><label>Jenis Kerusakan *</label>
+      <select id="tp-kerusakan"><option value="">Pilih kerusakan...</option><option>LCD / Layar Retak</option><option>LCD / Layar Mati</option><option>Baterai Boros</option><option>Tidak Bisa Charge</option><option>Kemasukan Air</option><option>Kamera Bermasalah</option><option>Tidak Ada Sinyal</option><option>Mati Total</option><option>Tombol Tidak Berfungsi</option><option>Speaker / Mic Rusak</option><option>Lainnya</option></select>
+    </div>
+    <div class="form-group"><label>Deskripsi</label><textarea id="tp-deskripsi" placeholder="Deskripsi kerusakan lebih detail..."></textarea></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label>Status Awal</label>
+        <select id="tp-status"><option value="Antrian">⏳ Antrian</option><option value="Proses">⚙️ Proses</option></select>
+      </div>
+      <div class="form-group"><label>Biaya (jika langsung diketahui)</label><input type="number" id="tp-biaya" placeholder="0"></div>
+    </div>
+    <button class="btn-sm primary" style="width:100%;padding:12px;font-size:14px" onclick="tambahPesanan()">Simpan Pesanan</button>
   </div>
 </div>
 
-<!-- Tambah Stok -->
+<!-- Tambah / Edit Stok -->
 <div class="modal-overlay" id="modal-tambah-stok">
   <div class="modal-box">
     <button class="modal-close-btn" onclick="closeModal('modal-tambah-stok')">✕</button>
-    <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:20px">📦 Tambah/Edit Barang</h3>
+    <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:20px" id="stok-modal-title">📦 Tambah Barang</h3>
     <input type="hidden" id="stok-edit-id">
-    <div class="form-group"><label>Nama Barang *</label><input type="text" id="ts-nama" placeholder="cth: LCD iPhone 14"></div>
+    <div class="form-group"><label>Nama Barang *</label><input type="text" id="ts-nama" placeholder="cth: LCD iPhone 14 Pro"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="form-group"><label>Kategori</label><select id="ts-kategori"><option>LCD / Layar</option><option>Baterai</option><option>Kamera</option><option>Port / Connector</option><option>Speaker / Mic</option><option>Alat Service</option><option>Lainnya</option></select></div>
+      <div class="form-group"><label>Kategori</label>
+        <select id="ts-kategori"><option>LCD / Layar</option><option>Baterai</option><option>Kamera</option><option>Port / Connector</option><option>Speaker / Mic</option><option>Tombol</option><option>Alat Service</option><option>Lainnya</option></select>
+      </div>
       <div class="form-group"><label>Ikon Emoji</label><input type="text" id="ts-icon" placeholder="cth: 🖥️" maxlength="4"></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="form-group"><label>Jumlah Stok *</label><input type="number" id="ts-qty" placeholder="0" min="0"></div>
-      <div class="form-group"><label>Batas Minimum</label><input type="number" id="ts-min" placeholder="5" min="0"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <div class="form-group"><label>Stok Saat Ini *</label><input type="number" id="ts-qty" placeholder="0" min="0"></div>
+      <div class="form-group"><label>Stok Minimum</label><input type="number" id="ts-min" placeholder="5" min="0"></div>
+      <div class="form-group"><label>Harga Beli (Rp)</label><input type="number" id="ts-harga-beli" placeholder="0"></div>
     </div>
-    <div class="form-group"><label>Harga Beli (Rp)</label><input type="number" id="ts-harga" placeholder="0"></div>
+    <div class="form-group"><label>Harga Jual / Service (Rp)</label><input type="number" id="ts-harga-jual" placeholder="0"></div>
     <button class="btn-sm primary" style="width:100%;padding:12px;font-size:14px" onclick="simpanStok()">Simpan Barang</button>
   </div>
 </div>
@@ -851,30 +1017,71 @@ tbody td{padding:14px 22px;font-size:13px}
 const WA_NUMBER = "6283137573172";
 
 /* ═══ ROUTER ═══ */
-const VIEWS = ['landing','tracking','admin-login','admin-dashboard'];
+const VIEWS = ['landing', 'tracking', 'admin-login', 'admin-dashboard'];
 function goTo(view) {
   // Auth guard
   if (view === 'admin-dashboard') {
-    if (sessionStorage.getItem('fixtech_admin_auth') !== 'true') { goTo('admin-login'); return; }
+    if (sessionStorage.getItem('fixtech_admin_auth') !== 'true') { 
+      goTo('admin-login'); 
+      return; 
+    }
   }
+
+  // Reset UI Layers (Fix Blank Page)
   VIEWS.forEach(v => {
     const el = document.getElementById('view-' + v);
-    if (el) el.classList.remove('active');
+    if (el) {
+      el.classList.remove('active');
+      el.classList.remove('admin-mode'); // Reset class
+    }
   });
+
+  // Toggle Background Effects
+  const orbs = document.querySelectorAll('.orb');
+  const nav = document.getElementById('landing-nav');
+  const body = document.body;
+  
+  if (view === 'admin-dashboard' || view === 'admin-login') {
+    // Admin Mode: Hide Landing Backgrounds
+    orbs.forEach(o => o.style.display = 'none');
+    if(nav) nav.style.display = 'none';
+    body.classList.add('admin-mode');
+  } else {
+    // Landing Mode: Show Backgrounds
+    orbs.forEach(o => o.style.display = 'block');
+    if(view === 'landing' && nav) nav.style.display = 'flex';
+    body.classList.remove('admin-mode');
+  }
+
+  // Tampilkan View Target
   const target = document.getElementById('view-' + view);
   if (target) {
     target.classList.add('active');
+    if(view === 'admin-dashboard' || view === 'admin-login') {
+      target.classList.add('admin-mode');
+    }
     window.scrollTo(0, 0);
   }
+
   // Post-nav hooks
   if (view === 'landing') { initLanding(); }
   if (view === 'admin-dashboard') { initDashboard(); }
   if (view === 'tracking') { document.getElementById('track-result').innerHTML = ''; }
-  // Update hash safely (tidak error di iframe)
+  
   try { history.pushState({}, '', '#' + view); } catch(e) {}
 }
 
-// Init on load
+// Secret admin access — klik copyright 5x berturut-turut
+let secretClicks = 0, secretTimer = null;
+function secretClick() {
+  secretClicks++;
+  clearTimeout(secretTimer);
+  secretTimer = setTimeout(() => { secretClicks = 0; }, 3000);
+  if (secretClicks >= 5) {
+    secretClicks = 0;
+    goTo('admin-login');
+  }
+}
 window.addEventListener('load', () => {
   let hash = 'landing';
   try { hash = location.hash.replace('#','') || 'landing'; } catch(e) {}
@@ -986,58 +1193,111 @@ function kirimPermintaan() {
   document.getElementById('f-kerusakan').value='';
 }
 
+/* ═══ DATA DUMMY (FALLBACK) ═══ */
+const DUMMY_SERVICE_DATA = [
+  { id: 1, hp: "081234567890", nama: "Andi Pratama", merek: "Samsung", seri: "Galaxy S23 Ultra", kerusakan: "Layar Retak", status: "Proses", biaya: 450000, tanggal: "24/05/2025 10:00", deskripsi: "Layar pecah, LCD kedip" },
+  { id: 2, hp: "081298765432", nama: "Budi Santoso", merek: "iPhone", seri: "iPhone 14 Pro", kerusakan: "Ganti Baterai", status: "Selesai", biaya: 350000, tanggal: "22/05/2025 14:30", deskripsi: "Health battery 75%" },
+  { id: 3, hp: "085612345678", nama: "Rina Dewi", merek: "Xiaomi", seri: "Redmi Note 12", kerusakan: "Kena Air", status: "Antrian", biaya: 0, tanggal: "25/05/2025 08:15", deskripsi: "Hp masuk got, tidak menyala" },
+  { id: 4, hp: "081211112222", nama: "Joko Widodo", merek: "OPPO", seri: "Find X5 Pro", kerusakan: "Speaker Bermasalah", status: "Selesai", biaya: 150000, tanggal: "20/05/2025 11:00", deskripsi: "Suara kecil" }
+];
+
 /* ═══ TRACKING ═══ */
 let activeTrackTab = 'hp';
+
 function switchTrackTab(tab, btn) {
   activeTrackTab = tab;
-  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('ttab-hp').style.display = tab==='hp'?'block':'none';
-  document.getElementById('ttab-tiket').style.display = tab==='tiket'?'block':'none';
+  document.getElementById('ttab-hp').style.display = tab === 'hp' ? 'block' : 'none';
+  document.getElementById('ttab-tiket').style.display = tab === 'tiket' ? 'block' : 'none';
 }
+
 function cariStatus() {
   const wrap = document.getElementById('track-result');
-  const orders = loadOrders();
-  let results = [];
-  if (activeTrackTab === 'hp') {
-    const q = document.getElementById('input-hp').value.trim().replace(/[-\s]/g,'');
-    if (!q) { showTrackEmpty(wrap,'⚠️','Nomor HP kosong','Masukkan nomor HP yang kamu daftarkan saat service.'); return; }
-    results = orders.filter(o => o.hp.replace(/[-\s]/g,'').includes(q));
-  } else {
-    const q = document.getElementById('input-tiket').value.trim().replace('#','');
-    if (!q) { showTrackEmpty(wrap,'⚠️','Nomor tiket kosong','Masukkan nomor tiket yang kamu terima saat mendaftar.'); return; }
-    results = orders.filter(o => String(o.id).padStart(3,'0') === q.padStart(3,'0'));
+  const q = activeTrackTab === 'hp' 
+    ? document.getElementById('input-hp').value.trim().replace(/[-\s]/g, '') 
+    : document.getElementById('input-tiket').value.trim().replace('#', '');
+
+  if (!q) { 
+    showTrackEmpty(wrap, '⚠️', 'Input Kosong', 'Masukkan No HP atau Tiket.'); 
+    return; 
   }
-  if (results.length === 0) { showTrackEmpty(wrap,'😕','Tidak ditemukan','Data service tidak ditemukan. Pastikan nomor yang kamu masukkan sudah benar.'); return; }
-  const sorted = [...results].sort((a,b)=>b.id-a.id);
+
+  // Ambil data dari LocalStorage + Dummy
+  const savedOrders = loadOrders();
+  const allOrders = [...savedOrders, ...DUMMY_SERVICE_DATA];
+
+  // Filter hasil
+  let results = allOrders.filter(o => {
+    if (activeTrackTab === 'hp') {
+      const noHp = o.hp ? o.hp.replace(/[-\s]/g, '') : '';
+      return noHp.includes(q) || (o.nama && o.nama.toLowerCase().includes(q.toLowerCase()));
+    } else {
+      const ticket = String(o.id).padStart(3, '0');
+      return ticket === q.padStart(3, '0');
+    }
+  });
+
+  if (results.length === 0) { 
+    showTrackEmpty(wrap, '😕', 'Tidak Ditemukan', 'Coba nomor ini: 081234567890'); 
+    return; 
+  }
+
+  // Urutkan & Render
+  const sorted = [...results].sort((a, b) => b.id - a.id);
   wrap.innerHTML = `<div style="font-size:13px;color:var(--text3);margin-bottom:14px;text-align:center">Ditemukan ${sorted.length} service</div>` + sorted.map(renderTrackCard).join('');
 }
+
 function renderTrackCard(o) {
-  const sc = {Antrian:'s-antrian',Proses:'s-proses',Selesai:'s-selesai'}[o.status]||'s-antrian';
-  const se = {Antrian:'⏳',Proses:'⚙️',Selesai:'✅'}[o.status];
-  const steps = ['Antrian','Proses','Selesai'];
+  const sc = {Antrian:'s-antrian', Proses:'s-proses', Selesai:'s-selesai'}[o.status] || 's-antrian';
+  const se = {Antrian:'⏳', Proses:'⚙️', Selesai:'✅'}[o.status];
+  const steps = ['Antrian', 'Proses', 'Selesai'];
   const ci = steps.indexOf(o.status);
-  const tl = steps.map((s,i)=>`<div class="tl-step ${i<ci?'done':''} ${i===ci?'active':''}"><div class="tl-dot">${i<ci?'✓':['📋','🔧','✅'][i]}</div><div class="tl-label">${s}</div></div>`).join('');
-  const waMsg = encodeURIComponent(`Halo FixTech, saya ingin menanyakan status HP saya.\n\n🎫 No. Tiket: #${String(o.id).padStart(3,'0')}\n👤 Nama: ${o.nama}\n📱 ${o.merek} ${o.seri}\n\nMohon update statusnya ya, terima kasih 🙏`);
+  const tl = steps.map((s, i) => `
+    <div class="tl-step ${i < ci ? 'done' : ''} ${i === ci ? 'active' : ''}">
+      <div class="tl-dot">${i < ci ? '✓' : ['📋', '🔧', '✅'][i]}</div>
+      <div class="tl-label">${s}</div>
+    </div>
+  `).join('');
+
+  const waMsg = encodeURIComponent(`Halo FixTech, saya ingin menanyakan status HP saya.\n\n🎫 Tiket: #${String(o.id).padStart(3,'0')}\n👤 Nama: ${o.nama}\n📱 ${o.merek} ${o.seri}`);
+  
   return `<div class="order-card">
-    <div class="order-card-header"><div><div class="order-id-text">Tiket #${String(o.id).padStart(3,'0')}</div><div class="order-date-text">📅 ${o.tanggal}</div></div><span class="status-badge ${sc}">${se} ${o.status}</span></div>
+    <div class="order-card-header">
+      <div>
+        <div class="order-id-text">Tiket #${String(o.id).padStart(3,'0')}</div>
+        <div class="order-date-text">📅 ${o.tanggal}</div>
+      </div>
+      <span class="status-badge ${sc}">${se} ${o.status}</span>
+    </div>
     <div class="order-body">
       <div class="detail-grid">
         <div><div class="detail-label">Nama</div><div class="detail-val">${o.nama}</div></div>
-        <div><div class="detail-label">No. HP</div><div class="detail-val cyan">${o.hp}</div></div>
         <div><div class="detail-label">Merek</div><div class="detail-val">${o.merek}</div></div>
-        <div><div class="detail-label">Seri</div><div class="detail-val">${o.seri}</div></div>
+        <div><div class="detail-label">Seri</div><div class="detail-val cyan">${o.seri}</div></div>
+        <div><div class="detail-label">Kerusakan</div><div class="detail-val">${o.kerusakan}</div></div>
       </div>
-      <div style="margin-bottom:12px"><div class="detail-label">Kerusakan</div><div class="detail-val" style="margin-top:4px">${o.kerusakan}</div></div>
-      ${o.deskripsi?`<div class="deskripsi-box">📝 ${o.deskripsi}</div>`:''}
-      <div class="biaya-row"><span style="font-size:13px;color:var(--text2)">Estimasi Biaya</span><span class="biaya-val">${o.biaya&&o.biaya>0?'Rp '+Number(o.biaya).toLocaleString('id'):'Menunggu konfirmasi'}</span></div>
-      <div class="timeline-wrap"><div class="timeline-lbl">Progress Perbaikan</div><div class="tl-steps">${tl}</div></div>
+      ${o.deskripsi ? `<div class="deskripsi-box">📝 ${o.deskripsi}</div>` : ''}
+      <div class="biaya-row">
+        <span>Biaya Service</span>
+        <span class="biaya-val">${o.biaya > 0 ? 'Rp ' + o.biaya.toLocaleString('id') : 'Menunggu Konfirmasi'}</span>
+      </div>
+      <div class="timeline-wrap">
+        <div class="timeline-lbl">Progress Perbaikan</div>
+        <div class="tl-steps">${tl}</div>
+      </div>
       <a href="https://wa.me/${WA_NUMBER}?text=${waMsg}" target="_blank" class="btn-wa-link" style="margin-top:16px">💬 Tanya Status via WhatsApp</a>
     </div>
   </div>`;
 }
+
 function showTrackEmpty(wrap, icon, title, desc) {
-  wrap.innerHTML = `<div class="state-box"><div class="sicon">${icon}</div><h3>${title}</h3><p>${desc}</p><a href="https://wa.me/${WA_NUMBER}" target="_blank" class="btn-wa-link" style="max-width:280px;margin:20px auto 0">💬 Hubungi via WhatsApp</a></div>`;
+  wrap.innerHTML = `<div class="state-box">
+    <div class="sicon">${icon}</div>
+    <h3>${title}</h3>
+    <p>${desc}</p>
+    <a href="https://wa.me/${WA_NUMBER}" target="_blank" class="btn-wa-link" style="max-width:280px;margin:20px auto 0">💬 Hubungi via WhatsApp</a>
+  </div>`;
 }
 
 /* ═══ ADMIN LOGIN ═══ */
@@ -1090,222 +1350,411 @@ function showLoginError(msg) {
 }
 
 /* ═══ ADMIN DASHBOARD ═══ */
-const admTitles = {dashboard:'Dashboard',permintaan:'Permintaan Service',stok:'Stok Barang',laporan:'Laporan Keuangan'};
-let currentOrderId = null, lastOrderCount = 0;
+const admTitles={dashboard:'Dashboard',pesanan:'Pesanan Service',keuangan:'Keuangan & Omset',stok:'Stok Sparepart'};
+let currentOrderId=null,lastOrderCount=0,currentLaporanPeriod='hari',activeStatusTab='';
 
 function initDashboard() {
-  if (sessionStorage.getItem('fixtech_admin_auth')!=='true') return;
-  const login = parseInt(sessionStorage.getItem('fixtech_login_time')||'0');
-  if (Date.now()-login > 2*60*60*1000) { sessionStorage.clear(); goTo('admin-login'); return; }
-  document.getElementById('admin-name-display').textContent = sessionStorage.getItem('fixtech_admin_user')||'Admin';
+  // Cek Auth
+  if (sessionStorage.getItem('fixtech_admin_auth') !== 'true') {
+    goTo('admin-login');
+    return;
+  }
+  
+  // Cek Sesi
+  const login = parseInt(sessionStorage.getItem('fixtech_login_time') || '0');
+  if (Date.now() - login > 8 * 60 * 60 * 1000) {
+    sessionStorage.clear();
+    goTo('admin-login');
+    return;
+  }
+
+  // Force Tampil Sidebar (Fix Sidebar Tersembunyi)
+  const sidebar = document.querySelector('.sidebar');
+  if (sidebar) {
+    sidebar.style.transform = 'translateX(0)';
+    sidebar.style.display = 'flex';
+  }
+  
+  // Inisialisasi Halaman
+  document.getElementById('admin-name-display').textContent = sessionStorage.getItem('fixtech_admin_user') || 'Admin';
+  
   const d = new Date();
-  document.getElementById('topbar-date').textContent = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][d.getDay()]+', '+d.getDate()+' '+['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][d.getMonth()]+' '+d.getFullYear();
+  document.getElementById('topbar-date').textContent = 
+    ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][d.getDay()] + ', ' + 
+    d.getDate() + ' ' + ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'][d.getMonth()] + ' ' + d.getFullYear();
+
+  // Reset View
+  document.querySelectorAll('.adm-page').forEach(p => p.classList.remove('active'));
+  document.getElementById('adm-dashboard').classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('nav-dashboard').classList.add('active');
+  document.getElementById('page-title').textContent = 'Dashboard';
+
+  // Load Data
   renderDashboard();
   updateStokBadge();
   renderNotifPanel();
   lastOrderCount = loadOrders().length;
 }
-function doLogout() { if(confirm('Yakin mau keluar?')){ sessionStorage.clear(); goTo('landing'); } }
 
-function goAdmPage(name, navEl) {
-  document.querySelectorAll('.adm-page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('adm-'+name).classList.add('active');
-  document.getElementById('page-title').textContent = admTitles[name];
-  if (navEl) navEl.classList.add('active');
-  if (name==='permintaan') renderOrders();
-  if (name==='stok') renderStok();
-  if (name==='laporan') renderLaporan();
-  if (name==='dashboard') renderDashboard();
+/* DATA */
+function loadOrders(){return JSON.parse(localStorage.getItem('fixtech_orders')||'[]');}
+function saveOrders(d){localStorage.setItem('fixtech_orders',JSON.stringify(d));}
+function nextId(){const o=loadOrders();return o.length?Math.max(...o.map(x=>x.id))+1:1;}
+function loadStok(){
+  const def=[
+    {id:1,icon:'🖥️',nama:'LCD iPhone 14',kategori:'LCD / Layar',qty:8,min:3,harga_beli:850000,harga_jual:1200000},
+    {id:2,icon:'🔋',nama:'Baterai Samsung S23',kategori:'Baterai',qty:2,min:5,harga_beli:120000,harga_jual:200000},
+    {id:3,icon:'📷',nama:'Kamera Xiaomi 13',kategori:'Kamera',qty:5,min:3,harga_beli:200000,harga_jual:350000},
+    {id:4,icon:'🔌',nama:'Port Charging Type-C',kategori:'Port / Connector',qty:15,min:5,harga_beli:25000,harga_jual:75000},
+    {id:5,icon:'🔋',nama:'Baterai iPhone 13',kategori:'Baterai',qty:1,min:3,harga_beli:180000,harga_jual:280000},
+    {id:6,icon:'🖥️',nama:'LCD Samsung A54',kategori:'LCD / Layar',qty:4,min:2,harga_beli:320000,harga_jual:500000},
+  ];
+  return JSON.parse(localStorage.getItem('fixtech_stok')||JSON.stringify(def));
+}
+function saveStok(d){localStorage.setItem('fixtech_stok',JSON.stringify(d));}
+function loadNotifs(){return JSON.parse(localStorage.getItem('fixtech_notifs')||'[]');}
+
+/* DATE HELPERS */
+function parseTgl(tgl){
+  if(!tgl)return null;
+  const p=tgl.split(' ')[0].split('/');
+  return p.length===3?new Date(p[2],p[1]-1,p[0]):null;
+}
+function isTodayV2(tgl){const d=parseTgl(tgl);if(!d)return false;const n=new Date();return d.getDate()===n.getDate()&&d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear();}
+function isMingguIniV2(tgl){
+  const d=parseTgl(tgl);if(!d)return false;
+  const n=new Date(),day=n.getDay();
+  const sen=new Date(n);sen.setDate(n.getDate()-(day===0?6:day-1));sen.setHours(0,0,0,0);
+  const min=new Date(sen);min.setDate(sen.getDate()+6);min.setHours(23,59,59,999);
+  return d>=sen&&d<=min;
+}
+function isBulanIniV2(tgl){const d=parseTgl(tgl);if(!d)return false;const n=new Date();return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear();}
+
+/* DASHBOARD */
+function renderDashboard(){
+  const orders=loadOrders();
+  const selesai=orders.filter(o=>o.status==='Selesai');
+  const antrian=orders.filter(o=>o.status==='Antrian').length;
+  const proses=orders.filter(o=>o.status==='Proses').length;
+  const selesaiHari=selesai.filter(o=>isTodayV2(o.tgl_selesai||o.tanggal));
+  const omsetHari=selesaiHari.reduce((s,o)=>s+(o.biaya||0),0);
+  const omsetMinggu=selesai.filter(o=>isMingguIniV2(o.tgl_selesai||o.tanggal)).reduce((s,o)=>s+(o.biaya||0),0);
+  const omsetBulan=selesai.filter(o=>isBulanIniV2(o.tgl_selesai||o.tanggal)).reduce((s,o)=>s+(o.biaya||0),0);
+  const omsetTotal=selesai.reduce((s,o)=>s+(o.biaya||0),0);
+  document.getElementById('mc-antrian').textContent=antrian;
+  document.getElementById('mc-proses').textContent=proses;
+  document.getElementById('mc-selesai-hari').textContent=selesaiHari.length;
+  document.getElementById('mc-omset-hari').textContent='Rp '+omsetHari.toLocaleString('id');
+  document.getElementById('mc-omset-minggu').textContent='Rp '+omsetMinggu.toLocaleString('id');
+  document.getElementById('mc-omset-minggu-count').textContent=selesai.filter(o=>isMingguIniV2(o.tgl_selesai||o.tanggal)).length+' order selesai';
+  document.getElementById('mc-omset-bulan').textContent='Rp '+omsetBulan.toLocaleString('id');
+  document.getElementById('mc-omset-bulan-count').textContent=selesai.filter(o=>isBulanIniV2(o.tgl_selesai||o.tanggal)).length+' order selesai';
+  document.getElementById('mc-omset-total').textContent='Rp '+omsetTotal.toLocaleString('id');
+  document.getElementById('mc-omset-total-count').textContent=selesai.length+' order selesai';
+  const nc=document.getElementById('notif-count');
+  nc.textContent=antrian;nc.style.display=antrian>0?'inline-flex':'none';
+  // Stok warning
+  const low=loadStok().filter(s=>s.qty<=s.min);
+  document.getElementById('stok-warning-list').innerHTML=low.length===0
+    ?'<div style="font-size:13px;color:var(--text3);text-align:center;padding:20px">✅ Semua stok aman</div>'
+    :low.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg3);border-radius:8px;border:1px solid rgba(255,68,102,0.2)"><div><div style="font-size:13px;font-weight:500">${s.icon} ${s.nama}</div><div style="font-size:11px;color:var(--red)">Stok: ${s.qty} (min ${s.min})</div></div><button onclick="goAdmPage('stok',document.getElementById('nav-stok'))" style="font-size:11px;color:var(--cyan);background:none;border:none;cursor:pointer">Isi Stok</button></div>`).join('');
+  // Grafik 7 hari
+  renderBarChartDashboard(7);
+  // Recent orders
+  const recent=[...orders].reverse().slice(0,8);
+  document.getElementById('recent-orders-body').innerHTML=recent.length===0
+    ?`<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--text3)">Belum ada pesanan masuk</td></tr>`
+    :recent.map(o=>renderOrderRow(o,true)).join('');
 }
 
-function renderDashboard() {
-  const orders = loadOrders();
-  const antrian = orders.filter(o=>o.status==='Antrian').length;
-  const proses = orders.filter(o=>o.status==='Proses').length;
-  const selesai = orders.filter(o=>o.status==='Selesai').length;
-  const pendapatan = orders.filter(o=>o.status==='Selesai').reduce((s,o)=>s+(o.biaya||0),0);
-  document.getElementById('m-antrian').textContent = antrian;
-  document.getElementById('m-proses').textContent = proses;
-  document.getElementById('m-selesai').textContent = selesai;
-  document.getElementById('m-pendapatan').textContent = 'Rp '+pendapatan.toLocaleString('id');
-  document.getElementById('notif-count').textContent = antrian;
-  const tbody = document.getElementById('recent-orders-body');
-  const recent = [...orders].reverse().slice(0,5);
-  tbody.innerHTML = recent.length===0 ? `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text3)">Belum ada permintaan masuk</td></tr>` :
-    recent.map(o=>`<tr><td><div class="td-name">${o.nama}</div><div class="td-sub">${o.hp}</div></td><td>${o.merek} ${o.seri}</td><td>${o.kerusakan}</td><td style="color:var(--text3);font-size:12px">${o.tanggal}</td><td><span class="status-badge s-${o.status.toLowerCase()}">${o.status}</span></td></tr>`).join('');
-  renderBarChart('minggu');
+function renderBarChartDashboard(days){
+  const selesai=loadOrders().filter(o=>o.status==='Selesai');
+  const labels=[],vals=[];
+  for(let i=days-1;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    labels.push(i===0?'Hari ini':['Min','Sen','Sel','Rab','Kam','Jum','Sab'][d.getDay()]);
+    const dayO=selesai.filter(o=>{const td=parseTgl(o.tgl_selesai||o.tanggal);return td&&td.getDate()===d.getDate()&&td.getMonth()===d.getMonth()&&td.getFullYear()===d.getFullYear();});
+    vals.push(dayO.reduce((s,o)=>s+(o.biaya||0),0));
+  }
+  const max=Math.max(...vals,1);
+  document.getElementById('bar-chart').innerHTML=labels.map((l,i)=>`<div class="bar-col"><div style="font-size:9px;color:var(--cyan);margin-bottom:2px;text-align:center">${vals[i]>0?'Rp'+Math.round(vals[i]/1000)+'k':''}</div><div class="bar-fill ${i===labels.length-1?'active':''}" style="height:${Math.max(Math.round((vals[i]/max)*130),4)}px"></div><div class="bar-day">${l}</div></div>`).join('');
 }
-function renderBarChart(period) {
-  const labels = period==='minggu'?['Sen','Sel','Rab','Kam','Jum','Sab','Min']:['M1','M2','M3','M4'];
-  const vals = labels.map(()=>Math.floor(Math.random()*800000)+100000);
-  const max = Math.max(...vals);
-  document.getElementById('bar-chart').innerHTML = labels.map((l,i)=>`<div class="bar-col"><div class="bar-fill ${i===labels.length-1?'active':''}" style="height:${Math.round((vals[i]/max)*120)}px" title="Rp ${vals[i].toLocaleString('id')}"></div><div class="bar-day">${l}</div></div>`).join('');
-}
-function setFilter(btn, period) { document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderBarChart(period); }
+function setChartPeriod(btn,days){document.querySelectorAll('#adm-dashboard .filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderBarChartDashboard(parseInt(days));}
 
-function renderOrders() {
-  let orders = loadOrders();
-  const q = (document.getElementById('search-input')?.value||'').toLowerCase();
-  const fs = document.getElementById('filter-status')?.value||'';
-  if (q) orders = orders.filter(o=>o.nama.toLowerCase().includes(q)||o.hp.includes(q));
-  if (fs) orders = orders.filter(o=>o.status===fs);
-  const tbody = document.getElementById('orders-body');
-  tbody.innerHTML = orders.length===0 ? `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text3)">Tidak ada data</td></tr>` :
-    [...orders].reverse().map(o=>`<tr>
-      <td style="color:var(--text3);font-size:12px">#${String(o.id).padStart(3,'0')}</td>
-      <td><div class="td-name">${o.nama}</div><div class="td-sub">${o.alamat||'-'}</div></td>
-      <td style="color:var(--cyan)">${o.hp}</td>
-      <td>${o.merek} ${o.seri}</td>
-      <td>${o.kerusakan}</td>
-      <td><span class="status-badge s-${o.status.toLowerCase()}">${o.status}</span></td>
-      <td style="color:var(--text3);font-size:12px">${o.tanggal}</td>
-      <td><div class="action-btns"><button class="action-btn" onclick="openDetail(${o.id})">Detail</button><button class="action-btn danger" onclick="hapusOrder(${o.id})">Hapus</button></div></td>
-    </tr>`).join('');
+/* PESANAN */
+function renderPesanan(){
+  const orders=loadOrders();
+  const q=(document.getElementById('search-input')?.value||'').toLowerCase();
+  document.getElementById('tab-count-all').textContent=orders.length;
+  document.getElementById('tab-count-antrian').textContent=orders.filter(o=>o.status==='Antrian').length;
+  document.getElementById('tab-count-proses').textContent=orders.filter(o=>o.status==='Proses').length;
+  document.getElementById('tab-count-selesai').textContent=orders.filter(o=>o.status==='Selesai').length;
+  let filtered=[...orders].reverse();
+  if(q)filtered=filtered.filter(o=>o.nama.toLowerCase().includes(q)||o.hp.includes(q)||String(o.id).includes(q));
+  if(activeStatusTab)filtered=filtered.filter(o=>o.status===activeStatusTab);
+  document.getElementById('orders-body').innerHTML=filtered.length===0
+    ?`<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--text3)">Tidak ada data</td></tr>`
+    :filtered.map(o=>renderOrderRow(o,false)).join('');
 }
-function openDetail(id) {
-  const o = loadOrders().find(x=>x.id===id); if(!o) return;
-  currentOrderId = id;
-  document.getElementById('detail-status-select').value = o.status;
-  document.getElementById('detail-biaya').value = o.biaya||'';
-  document.getElementById('detail-content').innerHTML = [
-    ['ID','#'+String(o.id).padStart(3,'0')],['Nama',o.nama],['No. HP',o.hp],['Alamat',o.alamat||'-'],
-    ['Merek',o.merek],['Seri',o.seri],['Kerusakan',o.kerusakan],['Deskripsi',o.deskripsi||'-'],
-    ['Tanggal',o.tanggal],['Biaya',o.biaya?'Rp '+Number(o.biaya).toLocaleString('id'):'Belum ditentukan'],
-  ].map(([l,v])=>`<div class="detail-row"><span class="detail-row-label">${l}</span><span class="detail-row-val">${v}</span></div>`).join('');
+
+function filterStatusTab(status,btn){
+  activeStatusTab=status;
+  document.querySelectorAll('.stab-status').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPesanan();
+}
+
+function renderOrderRow(o,isRecent){
+  const sc={Antrian:'s-antrian',Proses:'s-proses',Selesai:'s-selesai'}[o.status]||'s-antrian';
+  if(isRecent)return`<tr>
+    <td style="color:var(--cyan);font-weight:600;font-size:12px">#${String(o.id).padStart(3,'0')}</td>
+    <td><div class="td-name">${o.nama}</div><div class="td-sub">${o.hp}</div></td>
+    <td>${o.merek} ${o.seri}</td>
+    <td>${o.kerusakan}</td>
+    <td style="color:var(--text3);font-size:12px">${o.tanggal}</td>
+    <td><span class="status-badge ${sc}">${o.status}</span></td>
+    <td><button class="action-btn" onclick="openDetail(${o.id})">Detail</button></td>
+  </tr>`;
+  return`<tr>
+    <td style="color:var(--cyan);font-weight:600;font-size:12px">#${String(o.id).padStart(3,'0')}</td>
+    <td><div class="td-name">${o.nama}</div><div class="td-sub">${o.alamat||'-'}</div></td>
+    <td style="color:var(--cyan)">${o.hp}</td>
+    <td>${o.merek} ${o.seri}</td>
+    <td>${o.kerusakan}</td>
+    <td style="color:var(--text3);font-size:11px">${o.tanggal}</td>
+    <td><span class="status-badge ${sc}">${o.status}</span></td>
+    <td style="color:${o.biaya?'var(--green)':'var(--text3)'};font-weight:${o.biaya?'600':'400'}">${o.biaya&&o.biaya>0?'Rp '+Number(o.biaya).toLocaleString('id'):'-'}</td>
+    <td><div class="action-btns">
+      <button class="action-btn" onclick="openDetail(${o.id})">Detail</button>
+      <button class="action-btn danger" onclick="hapusPesanan(${o.id})">Hapus</button>
+    </div></td>
+  </tr>`;
+}
+
+function openDetail(id){
+  const o=loadOrders().find(x=>x.id===id);if(!o)return;
+  currentOrderId=id;
+  document.getElementById('detail-status-select').value=o.status;
+  document.getElementById('detail-biaya').value=o.biaya||'';
+  document.getElementById('detail-catatan').value=o.catatan||'';
+  document.getElementById('detail-content').innerHTML=`
+    <div style="background:var(--bg3);border-radius:var(--radius);padding:16px;margin-bottom:4px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${[['Tiket','#'+String(o.id).padStart(3,'0')],['Tgl Masuk',o.tanggal],['Nama',o.nama],['No. HP',o.hp],['Alamat',o.alamat||'-'],['Merek',o.merek],['Seri',o.seri],['Kerusakan',o.kerusakan]].map(([l,v])=>`<div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px">${l}</div><div style="font-size:13px;font-weight:500">${v}</div></div>`).join('')}
+      </div>
+      ${o.deskripsi?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">DESKRIPSI</div><div style="font-size:13px;color:var(--text2)">${o.deskripsi}</div></div>`:''}
+      ${o.catatan?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)"><div style="font-size:10px;color:var(--yellow);margin-bottom:4px">CATATAN TEKNISI</div><div style="font-size:13px;color:var(--text2)">${o.catatan}</div></div>`:''}
+    </div>`;
   openModal('modal-detail');
 }
-function updateStatus() {
-  if (!currentOrderId) return;
-  const orders = loadOrders();
-  const idx = orders.findIndex(x=>x.id===currentOrderId); if(idx<0) return;
-  orders[idx].status = document.getElementById('detail-status-select').value;
-  orders[idx].biaya = parseInt(document.getElementById('detail-biaya').value)||0;
+
+function updatePesanan(){
+  if(!currentOrderId)return;
+  const orders=loadOrders();
+  const idx=orders.findIndex(x=>x.id===currentOrderId);if(idx<0)return;
+  const newStatus=document.getElementById('detail-status-select').value;
+  orders[idx].status=newStatus;
+  orders[idx].biaya=parseInt(document.getElementById('detail-biaya').value)||0;
+  orders[idx].catatan=document.getElementById('detail-catatan').value.trim();
+  if(newStatus==='Selesai'&&!orders[idx].tgl_selesai){
+    const n=new Date();
+    orders[idx].tgl_selesai=n.toLocaleDateString('id-ID')+' '+n.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+  }
   saveOrders(orders);
   closeModal('modal-detail');
-  showToast('success','✅ Status berhasil diperbarui!');
+  showToast('success','✅ Pesanan berhasil diperbarui!');
   renderDashboard();
-  if(document.getElementById('adm-permintaan').classList.contains('active')) renderOrders();
-}
-function hapusOrder(id) {
-  if (!confirm('Yakin hapus?')) return;
-  saveOrders(loadOrders().filter(o=>o.id!==id));
-  renderOrders(); renderDashboard();
-  showToast('error','🗑️ Permintaan dihapus');
-}
-function tambahOrder() {
-  const nama=document.getElementById('to-nama').value.trim();
-  const hp=document.getElementById('to-hp').value.trim();
-  const merek=document.getElementById('to-merek').value;
-  const seri=document.getElementById('to-seri').value.trim();
-  const kerusakan=document.getElementById('to-kerusakan').value;
-  if(!nama||!hp||!merek||!seri||!kerusakan){showToast('error','⚠️ Lengkapi field wajib');return;}
-  const orders=loadOrders();
-  orders.push({id:nextId(),nama,hp,alamat:document.getElementById('to-alamat').value.trim(),merek,seri,kerusakan,deskripsi:document.getElementById('to-deskripsi').value.trim(),status:'Antrian',biaya:0,tanggal:new Date().toLocaleDateString('id-ID'),sumber:'Manual Admin'});
-  saveOrders(orders);
-  closeModal('modal-tambah-order');
-  renderOrders(); renderDashboard();
-  showToast('success','✅ Permintaan ditambahkan!');
+  if(document.getElementById('adm-pesanan')?.classList.contains('active'))renderPesanan();
+  if(document.getElementById('adm-keuangan')?.classList.contains('active'))renderKeuangan();
+  updateStokBadge();
 }
 
-function renderStok() {
-  const stok=loadStok();
+function hapusPesanan(id){
+  if(!confirm('Yakin hapus pesanan ini?'))return;
+  saveOrders(loadOrders().filter(o=>o.id!==id));
+  renderPesanan();renderDashboard();
+  showToast('error','🗑️ Pesanan dihapus');
+}
+
+function tambahPesanan(){
+  const nama=document.getElementById('tp-nama').value.trim();
+  const hp=document.getElementById('tp-hp').value.trim();
+  const merek=document.getElementById('tp-merek').value;
+  const seri=document.getElementById('tp-seri').value.trim();
+  const kerusakan=document.getElementById('tp-kerusakan').value;
+  if(!nama||!hp||!merek||!seri||!kerusakan){showToast('error','⚠️ Lengkapi field yang wajib diisi');return;}
+  const n=new Date();
+  const tgl=n.toLocaleDateString('id-ID')+' '+n.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+  const status=document.getElementById('tp-status').value;
+  const biaya=parseInt(document.getElementById('tp-biaya').value)||0;
+  const order={id:nextId(),nama,hp,alamat:document.getElementById('tp-alamat').value.trim(),merek,seri,kerusakan,deskripsi:document.getElementById('tp-deskripsi').value.trim(),status,biaya,tanggal:tgl,sumber:'Manual Admin'};
+  if(status==='Selesai')order.tgl_selesai=tgl;
+  const orders=loadOrders();orders.push(order);saveOrders(orders);
+  closeModal('modal-tambah-pesanan');
+  ['tp-nama','tp-hp','tp-alamat','tp-seri','tp-deskripsi','tp-biaya'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('tp-merek').value='';document.getElementById('tp-kerusakan').value='';document.getElementById('tp-status').value='Antrian';
+  renderPesanan();renderDashboard();
+  showToast('success','✅ Pesanan berhasil ditambahkan!');
+}
+
+/* KEUANGAN */
+function renderKeuangan(){setLaporanPeriod(currentLaporanPeriod,null);}
+function setLaporanPeriod(period,btn){
+  currentLaporanPeriod=period;
+  if(btn){document.querySelectorAll('#adm-keuangan .filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+  const allSelesai=loadOrders().filter(o=>o.status==='Selesai');
+  let filtered=allSelesai;
+  if(period==='hari')filtered=allSelesai.filter(o=>isTodayV2(o.tgl_selesai||o.tanggal));
+  else if(period==='minggu')filtered=allSelesai.filter(o=>isMingguIniV2(o.tgl_selesai||o.tanggal));
+  else if(period==='bulan')filtered=allSelesai.filter(o=>isBulanIniV2(o.tgl_selesai||o.tanggal));
+  else if(period==='custom'){
+    const dari=document.getElementById('filter-tgl-dari').value;
+    const sampai=document.getElementById('filter-tgl-sampai').value;
+    if(dari&&sampai){filtered=allSelesai.filter(o=>{const d=parseTgl(o.tgl_selesai||o.tanggal);return d&&d>=new Date(dari)&&d<=new Date(sampai+'T23:59:59');});}
+  }
+  const total=filtered.reduce((s,o)=>s+(o.biaya||0),0);
+  const rata=filtered.length>0?Math.round(total/filtered.length):0;
+  const tertinggi=filtered.length>0?Math.max(...filtered.map(o=>o.biaya||0)):0;
+  document.getElementById('lap-total-omset').textContent='Rp '+total.toLocaleString('id');
+  document.getElementById('lap-total-order').textContent=filtered.length;
+  document.getElementById('lap-rata-rata').textContent='Rp '+rata.toLocaleString('id');
+  document.getElementById('lap-tertinggi').textContent='Rp '+tertinggi.toLocaleString('id');
+  const days=period==='hari'?1:period==='minggu'?7:period==='bulan'?30:14;
+  const labels=[],vals=[];
+  for(let i=Math.min(days,14)-1;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    labels.push(String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0'));
+    const dayO=filtered.filter(o=>{const td=parseTgl(o.tgl_selesai||o.tanggal);return td&&td.getDate()===d.getDate()&&td.getMonth()===d.getMonth()&&td.getFullYear()===d.getFullYear();});
+    vals.push(dayO.reduce((s,o)=>s+(o.biaya||0),0));
+  }
+  const maxV=Math.max(...vals,1);
+  const ce=document.getElementById('bar-chart-lap');
+  if(ce)ce.innerHTML=labels.map((l,i)=>`<div class="bar-col"><div style="font-size:9px;color:var(--cyan);margin-bottom:2px;text-align:center">${vals[i]>0?'Rp'+Math.round(vals[i]/1000)+'k':''}</div><div class="bar-fill" style="height:${Math.max(Math.round((vals[i]/maxV)*140),4)}px;background:${vals[i]>0?'var(--cyan)':'var(--bg3)'}"></div><div class="bar-day">${l}</div></div>`).join('');
+  document.getElementById('laporan-body').innerHTML=[...filtered].reverse().length===0
+    ?`<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--text3)">Belum ada transaksi di periode ini</td></tr>`
+    :[...filtered].reverse().map(o=>`<tr>
+      <td style="color:var(--cyan);font-weight:600">#${String(o.id).padStart(3,'0')}</td>
+      <td><div class="td-name">${o.nama}</div><div class="td-sub">${o.hp}</div></td>
+      <td>${o.merek} ${o.seri}</td><td>${o.kerusakan}</td>
+      <td style="color:var(--text3);font-size:12px">${o.tgl_selesai||o.tanggal}</td>
+      <td style="color:var(--green);font-weight:600">Rp ${(o.biaya||0).toLocaleString('id')}</td>
+    </tr>`).join('');
+}
+function exportCSV(){
+  const orders=loadOrders().filter(o=>o.status==='Selesai');
+  const csv=['Tiket,Nama,No HP,Merek,Seri,Kerusakan,Tanggal Selesai,Biaya',...orders.map(o=>[`#${String(o.id).padStart(3,'0')}`,o.nama,o.hp,o.merek,o.seri,o.kerusakan,o.tgl_selesai||o.tanggal,o.biaya||0].join(','))].join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='fixtech-laporan-'+new Date().toLocaleDateString('id-ID').replace(/\//g,'-')+'.csv';a.click();
+  showToast('success','📊 CSV berhasil didownload!');
+}
+
+/* STOK */
+function renderStok(){
+  let stok=loadStok();
+  const q=(document.getElementById('stok-search')?.value||'').toLowerCase();
+  if(q)stok=stok.filter(s=>s.nama.toLowerCase().includes(q)||s.kategori.toLowerCase().includes(q));
   const low=stok.filter(s=>s.qty<=s.min);
+  const nilai=stok.reduce((s,i)=>s+(i.qty*(i.harga_beli||0)),0);
+  document.getElementById('stok-total-jenis').textContent=stok.length;
+  document.getElementById('stok-total-menipis').textContent=low.length;
+  document.getElementById('stok-nilai-total').textContent='Rp '+nilai.toLocaleString('id');
   const alertEl=document.getElementById('stok-alert');
-  if(low.length>0){alertEl.style.display='flex';document.getElementById('stok-alert-text').textContent=`${low.length} barang hampir habis: ${low.map(s=>s.nama).join(', ')}`;}
+  if(low.length>0){alertEl.style.display='flex';document.getElementById('stok-alert-text').textContent=`${low.length} barang menipis: ${low.map(s=>s.nama).join(', ')}`;}
   else{alertEl.style.display='none';}
-  document.getElementById('stok-grid').innerHTML=stok.map(s=>`
-    <div class="stok-card ${s.qty<=s.min?'low':''}">
-      <div class="stok-icon">${s.icon||'📦'}</div>
+  document.getElementById('stok-grid').innerHTML=stok.length===0
+    ?`<div style="text-align:center;padding:40px;color:var(--text3);grid-column:1/-1">Tidak ada barang ditemukan</div>`
+    :stok.map(s=>`<div class="stok-card ${s.qty<=s.min?'low':''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <span style="font-size:24px">${s.icon||'📦'}</span>
+        <span style="font-size:10px;padding:2px 8px;border-radius:100px;font-weight:600;${s.qty<=s.min?'background:var(--red-dim);color:var(--red)':'background:var(--green-dim);color:var(--green)'}">${s.qty<=s.min?'MENIPIS':'AMAN'}</span>
+      </div>
       <div class="stok-name">${s.nama}</div>
       <div class="stok-cat">${s.kategori}</div>
-      <div class="stok-qty-row">
-        <div><div class="stok-qty ${s.qty<=s.min?'low':'ok'}">${s.qty}</div><div class="stok-unit">unit tersedia</div></div>
-        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-          <button class="action-btn" onclick="editStok(${s.id})">Edit</button>
-          <button class="action-btn danger" onclick="hapusStok(${s.id})">Hapus</button>
+      <div class="stok-qty-row" style="margin-top:12px">
+        <div><div class="stok-qty ${s.qty<=s.min?'low':'ok'}">${s.qty}</div><div class="stok-unit">unit (min. ${s.min})</div></div>
+        <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">
+          <button class="action-btn" onclick="editStok(${s.id})">✏️ Edit</button>
+          <button class="action-btn danger" onclick="hapusStok(${s.id})">🗑️</button>
         </div>
       </div>
-      ${s.qty<=s.min?`<div class="stok-warn">⚠️ Stok menipis! Min: ${s.min}</div>`:''}
-      ${s.harga?`<div style="font-size:11px;color:var(--text3);margin-top:8px">Harga beli: Rp ${Number(s.harga).toLocaleString('id')}</div>`:''}
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div><div style="font-size:10px;color:var(--text3)">Harga Beli</div><div style="font-size:12px;font-weight:600">${s.harga_beli?'Rp '+Number(s.harga_beli).toLocaleString('id'):'-'}</div></div>
+        <div><div style="font-size:10px;color:var(--text3)">Harga Jual</div><div style="font-size:12px;font-weight:600;color:var(--cyan)">${s.harga_jual?'Rp '+Number(s.harga_jual).toLocaleString('id'):'-'}</div></div>
+      </div>
     </div>`).join('');
 }
-function openTambahStok(){document.getElementById('stok-edit-id').value='';['ts-nama','ts-qty','ts-min','ts-harga','ts-icon'].forEach(id=>document.getElementById(id).value='');document.getElementById('ts-kategori').value='LCD / Layar';openModal('modal-tambah-stok');}
-function editStok(id){const s=loadStok().find(x=>x.id===id);if(!s)return;document.getElementById('stok-edit-id').value=id;document.getElementById('ts-nama').value=s.nama;document.getElementById('ts-kategori').value=s.kategori;document.getElementById('ts-icon').value=s.icon||'';document.getElementById('ts-qty').value=s.qty;document.getElementById('ts-min').value=s.min;document.getElementById('ts-harga').value=s.harga||'';openModal('modal-tambah-stok');}
+function openTambahStok(){document.getElementById('stok-edit-id').value='';document.getElementById('stok-modal-title').textContent='📦 Tambah Barang';['ts-nama','ts-qty','ts-min','ts-harga-beli','ts-harga-jual','ts-icon'].forEach(id=>document.getElementById(id).value='');document.getElementById('ts-kategori').value='LCD / Layar';openModal('modal-tambah-stok');}
+function editStok(id){const s=loadStok().find(x=>x.id===id);if(!s)return;document.getElementById('stok-edit-id').value=id;document.getElementById('stok-modal-title').textContent='✏️ Edit Barang';document.getElementById('ts-nama').value=s.nama;document.getElementById('ts-kategori').value=s.kategori;document.getElementById('ts-icon').value=s.icon||'';document.getElementById('ts-qty').value=s.qty;document.getElementById('ts-min').value=s.min;document.getElementById('ts-harga-beli').value=s.harga_beli||'';document.getElementById('ts-harga-jual').value=s.harga_jual||'';openModal('modal-tambah-stok');}
 function simpanStok(){
   const nama=document.getElementById('ts-nama').value.trim();
   const qty=parseInt(document.getElementById('ts-qty').value);
-  if(!nama||isNaN(qty)){showToast('error','⚠️ Lengkapi nama dan jumlah');return;}
-  const stok=loadStok();
-  const editId=document.getElementById('stok-edit-id').value;
-  const item={nama,kategori:document.getElementById('ts-kategori').value,icon:document.getElementById('ts-icon').value||'📦',qty,min:parseInt(document.getElementById('ts-min').value)||5,harga:parseInt(document.getElementById('ts-harga').value)||0};
+  if(!nama||isNaN(qty)){showToast('error','⚠️ Lengkapi nama dan jumlah stok');return;}
+  const stok=loadStok();const editId=document.getElementById('stok-edit-id').value;
+  const item={nama,kategori:document.getElementById('ts-kategori').value,icon:document.getElementById('ts-icon').value||'📦',qty,min:parseInt(document.getElementById('ts-min').value)||5,harga_beli:parseInt(document.getElementById('ts-harga-beli').value)||0,harga_jual:parseInt(document.getElementById('ts-harga-jual').value)||0};
   if(editId){const idx=stok.findIndex(x=>x.id===parseInt(editId));stok[idx]={...stok[idx],...item};}
   else{item.id=stok.length?Math.max(...stok.map(s=>s.id))+1:1;stok.push(item);}
   saveStok(stok);closeModal('modal-tambah-stok');renderStok();updateStokBadge();showToast('success','✅ Stok berhasil disimpan!');
 }
 function hapusStok(id){if(!confirm('Yakin hapus barang ini?'))return;saveStok(loadStok().filter(s=>s.id!==id));renderStok();updateStokBadge();showToast('error','🗑️ Barang dihapus');}
+function updateStokBadge(){const low=loadStok().filter(s=>s.qty<=s.min).length;const b=document.getElementById('stok-warn-count');if(b){b.style.display=low>0?'inline-flex':'none';}}
 
-function renderLaporan() {
-  const selesai=loadOrders().filter(o=>o.status==='Selesai');
-  const totalBulan=selesai.reduce((s,o)=>s+(o.biaya||0),0);
-  const totalMinggu=selesai.slice(-7).reduce((s,o)=>s+(o.biaya||0),0);
-  document.getElementById('lap-minggu').textContent='Rp '+totalMinggu.toLocaleString('id');
-  document.getElementById('lap-minggu-count').textContent=`${Math.min(selesai.length,7)} order selesai`;
-  document.getElementById('lap-bulan').textContent='Rp '+totalBulan.toLocaleString('id');
-  document.getElementById('lap-bulan-count').textContent=`${selesai.length} order selesai`;
-  const tbody=document.getElementById('laporan-body');
-  tbody.innerHTML=selesai.length===0?`<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text3)">Belum ada transaksi selesai</td></tr>`:
-    [...selesai].reverse().map(o=>`<tr><td><div class="td-name">${o.nama}</div></td><td>${o.merek} ${o.seri}</td><td>${o.kerusakan}</td><td style="color:var(--text3);font-size:12px">${o.tanggal}</td><td style="color:var(--green);font-weight:600">Rp ${(o.biaya||0).toLocaleString('id')}</td></tr>`).join('');
-}
-
-function renderNotifPanel() {
+/* NOTIFIKASI */
+function renderNotifPanel(){
   const notifs=loadNotifs();
-  const unread=notifs.filter(n=>!n.read).length;
   const dot=document.getElementById('notif-dot');
-  if(dot) dot.style.display=unread>0?'block':'none';
-  const list=document.getElementById('notif-list');
-  if(!list) return;
-  list.innerHTML=notifs.length===0?`<div style="padding:24px;text-align:center;color:var(--text3);font-size:13px">Tidak ada notifikasi</div>`:
-    notifs.slice(0,10).map(n=>`<div class="notif-item ${n.read?'':'unread'}"><span style="font-size:18px;flex-shrink:0">📋</span><div style="flex:1"><div class="notif-item-name">${n.nama} — ${n.kerusakan}</div><div class="notif-item-sub">${n.merek} ${n.seri} · ${n.tanggal}</div></div><span class="notif-item-id">#${String(n.id).padStart(3,'0')}</span></div>`).join('');
-  const updated=notifs.map(n=>({...n,read:true}));
-  localStorage.setItem('fixtech_notifs',JSON.stringify(updated));
-  if(dot) dot.style.display='none';
+  if(dot)dot.style.display=notifs.filter(n=>!n.read).length>0?'block':'none';
+  const list=document.getElementById('notif-list');if(!list)return;
+  list.innerHTML=notifs.length===0
+    ?`<div style="padding:24px;text-align:center;color:var(--text3);font-size:13px">Tidak ada notifikasi baru</div>`
+    :notifs.slice(0,15).map(n=>`<div class="notif-item ${n.read?'':'unread'}" style="cursor:pointer" onclick="goAdmPage('pesanan',document.getElementById('nav-pesanan'));document.getElementById('notif-panel').style.display='none'"><span style="font-size:18px;flex-shrink:0">📋</span><div style="flex:1"><div class="notif-item-name">${n.nama} — ${n.kerusakan}</div><div class="notif-item-sub">${n.merek} ${n.seri} · ${n.tanggal}</div></div><span class="notif-item-id">#${String(n.id).padStart(3,'0')}</span></div>`).join('');
+  localStorage.setItem('fixtech_notifs',JSON.stringify(notifs.map(n=>({...n,read:true}))));
+  if(dot)dot.style.display='none';
 }
-function toggleNotifPanel(){const p=document.getElementById('notif-panel');const open=p.style.display!=='none'&&p.style.display!=='';p.style.display=open?'none':'block';if(!open)renderNotifPanel();}
-function clearNotifs(){localStorage.removeItem('fixtech_notifs');renderNotifPanel();document.getElementById('notif-panel').style.display='none';}
+function toggleNotifPanel(){const p=document.getElementById('notif-panel');const open=p.style.display==='block';p.style.display=open?'none':'block';if(!open)renderNotifPanel();}
+function clearNotifs(){localStorage.removeItem('fixtech_notifs');renderNotifPanel();document.getElementById('notif-panel').style.display='none';showToast('success','🗑️ Notifikasi dihapus');}
 document.addEventListener('click',e=>{
-  const panel=document.getElementById('notif-panel');
-  const btn=document.getElementById('notif-btn');
-  if(panel&&btn&&!panel.contains(e.target)&&!btn.contains(e.target)) panel.style.display='none';
+  const p=document.getElementById('notif-panel'),b=document.getElementById('notif-btn');
+  if(p&&b&&!p.contains(e.target)&&!b.contains(e.target))p.style.display='none';
 });
-function updateStokBadge(){const low=loadStok().filter(s=>s.qty<=s.min).length;const b=document.getElementById('stok-warn-count');if(b){b.style.display=low>0?'inline-flex':'none';b.textContent=low;}}
 
-// Auto-refresh
+/* BACKUP / RESTORE */
+function exportData(){
+  const data={orders:loadOrders(),stok:loadStok(),exported:new Date().toISOString()};
+  const a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(data,null,2));
+  a.download='fixtech-backup-'+new Date().toLocaleDateString('id-ID').replace(/\//g,'-')+'.json';a.click();
+  showToast('success','💾 Backup berhasil didownload!');
+}
+function importData(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{const data=JSON.parse(ev.target.result);if(data.orders)saveOrders(data.orders);if(data.stok)saveStok(data.stok);showToast('success','✅ Data berhasil direstore!');renderDashboard();updateStokBadge();}
+    catch{showToast('error','❌ File tidak valid!');}
+  };
+  r.readAsText(file);e.target.value='';
+}
+
+/* AUTO REFRESH */
 setInterval(()=>{
-  if(document.getElementById('view-admin-dashboard').classList.contains('active')){
-    const orders=loadOrders();
-    document.getElementById('notif-count').textContent=orders.filter(o=>o.status==='Antrian').length;
-    if(orders.length>lastOrderCount&&lastOrderCount>0){
-      showToast('success',`🔔 Ada ${orders.length-lastOrderCount} permintaan baru!`);
-      renderDashboard();
-      const dot=document.getElementById('notif-dot');
-      if(dot&&loadNotifs().some(n=>!n.read)) dot.style.display='block';
-    }
-    lastOrderCount=orders.length;
-    updateStokBadge();
+  if(!document.getElementById('view-admin-dashboard').classList.contains('active'))return;
+  const orders=loadOrders();const antrian=orders.filter(o=>o.status==='Antrian').length;
+  const nc=document.getElementById('notif-count');if(nc){nc.textContent=antrian;nc.style.display=antrian>0?'inline-flex':'none';}
+  if(orders.length>lastOrderCount&&lastOrderCount>0){
+    showToast('success',`🔔 ${orders.length-lastOrderCount} pesanan baru masuk!`);
+    if(document.getElementById('adm-dashboard').classList.contains('active'))renderDashboard();
+    const dot=document.getElementById('notif-dot');if(dot&&loadNotifs().some(n=>!n.read))dot.style.display='block';
   }
+  lastOrderCount=orders.length;updateStokBadge();
 },30000);
 
-// Storage sync antar tab
 window.addEventListener('storage',e=>{
-  if(e.key==='fixtech_orders'||e.key==='fixtech_notifs'){
-    if(document.getElementById('view-admin-dashboard').classList.contains('active')){
-      renderDashboard();
-      if(document.getElementById('adm-permintaan').classList.contains('active')) renderOrders();
-      if(document.getElementById('adm-laporan').classList.contains('active')) renderLaporan();
-      renderNotifPanel();
-    }
-  }
+  if(!['fixtech_orders','fixtech_notifs','fixtech_stok'].includes(e.key))return;
+  if(!document.getElementById('view-admin-dashboard').classList.contains('active'))return;
+  if(document.getElementById('adm-dashboard').classList.contains('active'))renderDashboard();
+  if(document.getElementById('adm-pesanan')?.classList.contains('active'))renderPesanan();
+  if(document.getElementById('adm-keuangan')?.classList.contains('active'))renderKeuangan();
+  renderNotifPanel();updateStokBadge();
 });
 </script>
 </body>
