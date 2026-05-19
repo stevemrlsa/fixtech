@@ -28,32 +28,20 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");opacity:0.4}
 
 /* ── PAGE SYSTEM ── */
-.page-view {
-  display: none;
-  min-height: 100vh;
-  position: relative;
-}
-.page-view.active {
-  display: block;
-}
-#view-admin-login.active {
-  display: flex; /* Override untuk centering */
-  align-items: center;
-  justify-content: center;
-}
-#view-admin-dashboard.active {
-  display: flex; /* Override untuk layout dashboard */
-}
+.page-view{display:none;min-height:100vh}
+.page-view.active{display:block}
+.stab-status{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--border2);background:var(--bg3);color:var(--text3);cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif}
+.stab-status.active{background:var(--cyan-glow2);color:var(--cyan);border-color:rgba(0,212,255,0.3)}
+/* Admin login center */
+#view-admin-login.active{display:flex;align-items:center;justify-content:center;padding:24px}
+/* Tracking flex */
+#view-tracking.active{display:flex;flex-direction:column}
+/* Admin layout exception */
+#view-admin-dashboard.active{display:flex}
 
-/* Force hide background effects when in Admin */
-.page-view.active.admin-mode ~ .orb, 
-body.admin-mode .orb {
-  display: none !important;
-}
-body.admin-mode::before {
-  display: none;
-}
-
+.orb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
+.orb1{width:600px;height:600px;background:rgba(0,212,255,0.06);top:-200px;left:-200px}
+.orb2{width:400px;height:400px;background:rgba(0,212,255,0.04);bottom:100px;right:-100px}
 
 /* ── ANIMATIONS ── */
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
@@ -487,14 +475,7 @@ tbody td{padding:14px 22px;font-size:13px}
       <div class="order-item"><div class="order-icon">📱</div><div><div class="order-name">iPhone 14 Pro — Layar Retak</div><div class="order-detail">Budi Santoso • 10 menit lalu</div></div><div class="order-status status-proses">Proses</div></div>
       <div class="order-item"><div class="order-icon">🔋</div><div><div class="order-name">Samsung S23 — Ganti Baterai</div><div class="order-detail">Rina Dewi • 1 jam lalu</div></div><div class="order-status status-selesai">Selesai</div></div>
       <div class="order-item"><div class="order-icon">💧</div><div><div class="order-name">Xiaomi 13 — Kena Air</div><div class="order-detail">Agus Wijaya • baru masuk</div></div><div class="order-status status-menunggu">Antrian</div></div>
-      <div class="revenue-section">
-        <div class="revenue-label">PENDAPATAN MINGGU INI</div>
-        <div class="revenue-num">Rp 4.750.000</div>
-        <div class="revenue-sub">↑ 18% dari minggu lalu</div>
-        <div class="bar-chart">
-          <div class="bar" style="height:30%"></div><div class="bar" style="height:50%"></div><div class="bar" style="height:40%"></div><div class="bar" style="height:70%"></div><div class="bar" style="height:55%"></div><div class="bar active" style="height:85%"></div><div class="bar" style="height:65%"></div>
-        </div>
-      </div>
+
     </div>
   </div>
 </section>
@@ -1017,57 +998,38 @@ tbody td{padding:14px 22px;font-size:13px}
 const WA_NUMBER = "6283137573172";
 
 /* ═══ ROUTER ═══ */
-const VIEWS = ['landing', 'tracking', 'admin-login', 'admin-dashboard'];
+const VIEWS = ['landing','tracking','admin-login','admin-dashboard'];
+
+function closeAllModals() {
+  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
+}
+
 function goTo(view) {
+  closeAllModals();
   // Auth guard
   if (view === 'admin-dashboard') {
-    if (sessionStorage.getItem('fixtech_admin_auth') !== 'true') { 
-      goTo('admin-login'); 
-      return; 
-    }
+    if (sessionStorage.getItem('fixtech_admin_auth') !== 'true') { goTo('admin-login'); return; }
   }
-
-  // Reset UI Layers (Fix Blank Page)
+  // Sembunyikan semua view
   VIEWS.forEach(v => {
     const el = document.getElementById('view-' + v);
-    if (el) {
-      el.classList.remove('active');
-      el.classList.remove('admin-mode'); // Reset class
-    }
+    if (el) { el.classList.remove('active'); el.style.display = 'none'; }
   });
-
-  // Toggle Background Effects
-  const orbs = document.querySelectorAll('.orb');
-  const nav = document.getElementById('landing-nav');
-  const body = document.body;
-  
-  if (view === 'admin-dashboard' || view === 'admin-login') {
-    // Admin Mode: Hide Landing Backgrounds
-    orbs.forEach(o => o.style.display = 'none');
-    if(nav) nav.style.display = 'none';
-    body.classList.add('admin-mode');
-  } else {
-    // Landing Mode: Show Backgrounds
-    orbs.forEach(o => o.style.display = 'block');
-    if(view === 'landing' && nav) nav.style.display = 'flex';
-    body.classList.remove('admin-mode');
-  }
-
-  // Tampilkan View Target
   const target = document.getElementById('view-' + view);
   if (target) {
+    // Set display dulu sesuai tipe halaman
+    if (view === 'admin-dashboard') target.style.display = 'flex';
+    else if (view === 'admin-login') target.style.display = 'flex';
+    else if (view === 'tracking') target.style.display = 'flex';
+    else target.style.display = 'block';
     target.classList.add('active');
-    if(view === 'admin-dashboard' || view === 'admin-login') {
-      target.classList.add('admin-mode');
-    }
     window.scrollTo(0, 0);
   }
-
   // Post-nav hooks
-  if (view === 'landing') { initLanding(); }
-  if (view === 'admin-dashboard') { initDashboard(); }
-  if (view === 'tracking') { document.getElementById('track-result').innerHTML = ''; }
-  
+  if (view === 'landing') initLanding();
+  if (view === 'admin-dashboard') setTimeout(() => initDashboard(), 50);
+  if (view === 'tracking') { const r = document.getElementById('track-result'); if(r) r.innerHTML = ''; }
+  // Update hash safely
   try { history.pushState({}, '', '#' + view); } catch(e) {}
 }
 
@@ -1110,24 +1072,6 @@ function showToast(type, msg) {
   t.className = 'toast-el ' + (type === 'success' ? 'success' : 'error-t') + ' show';
   setTimeout(() => t.classList.remove('show'), 3000);
 }
-
-/* ═══ DATA ═══ */
-function loadOrders() { return JSON.parse(localStorage.getItem('fixtech_orders') || '[]'); }
-function saveOrders(d) { localStorage.setItem('fixtech_orders', JSON.stringify(d)); }
-function nextId() { const o = loadOrders(); return o.length ? Math.max(...o.map(x=>x.id))+1 : 1; }
-function loadStok() {
-  const def = [
-    {id:1,icon:'🖥️',nama:'LCD iPhone 14',kategori:'LCD / Layar',qty:8,min:3,harga:850000},
-    {id:2,icon:'🔋',nama:'Baterai Samsung S23',kategori:'Baterai',qty:2,min:5,harga:120000},
-    {id:3,icon:'📷',nama:'Kamera Xiaomi 13',kategori:'Kamera',qty:5,min:3,harga:200000},
-    {id:4,icon:'🔌',nama:'Port Charging Type-C',kategori:'Port / Connector',qty:15,min:5,harga:25000},
-    {id:5,icon:'🔋',nama:'Baterai iPhone 13',kategori:'Baterai',qty:1,min:3,harga:180000},
-    {id:6,icon:'🖥️',nama:'LCD Samsung A54',kategori:'LCD / Layar',qty:4,min:2,harga:320000},
-  ];
-  return JSON.parse(localStorage.getItem('fixtech_stok') || JSON.stringify(def));
-}
-function saveStok(d) { localStorage.setItem('fixtech_stok', JSON.stringify(d)); }
-function loadNotifs() { return JSON.parse(localStorage.getItem('fixtech_notifs') || '[]'); }
 
 /* ═══ LANDING ═══ */
 let counterDone = false;
@@ -1193,111 +1137,58 @@ function kirimPermintaan() {
   document.getElementById('f-kerusakan').value='';
 }
 
-/* ═══ DATA DUMMY (FALLBACK) ═══ */
-const DUMMY_SERVICE_DATA = [
-  { id: 1, hp: "081234567890", nama: "Andi Pratama", merek: "Samsung", seri: "Galaxy S23 Ultra", kerusakan: "Layar Retak", status: "Proses", biaya: 450000, tanggal: "24/05/2025 10:00", deskripsi: "Layar pecah, LCD kedip" },
-  { id: 2, hp: "081298765432", nama: "Budi Santoso", merek: "iPhone", seri: "iPhone 14 Pro", kerusakan: "Ganti Baterai", status: "Selesai", biaya: 350000, tanggal: "22/05/2025 14:30", deskripsi: "Health battery 75%" },
-  { id: 3, hp: "085612345678", nama: "Rina Dewi", merek: "Xiaomi", seri: "Redmi Note 12", kerusakan: "Kena Air", status: "Antrian", biaya: 0, tanggal: "25/05/2025 08:15", deskripsi: "Hp masuk got, tidak menyala" },
-  { id: 4, hp: "081211112222", nama: "Joko Widodo", merek: "OPPO", seri: "Find X5 Pro", kerusakan: "Speaker Bermasalah", status: "Selesai", biaya: 150000, tanggal: "20/05/2025 11:00", deskripsi: "Suara kecil" }
-];
-
 /* ═══ TRACKING ═══ */
 let activeTrackTab = 'hp';
-
 function switchTrackTab(tab, btn) {
   activeTrackTab = tab;
-  document.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('ttab-hp').style.display = tab === 'hp' ? 'block' : 'none';
-  document.getElementById('ttab-tiket').style.display = tab === 'tiket' ? 'block' : 'none';
+  document.getElementById('ttab-hp').style.display = tab==='hp'?'block':'none';
+  document.getElementById('ttab-tiket').style.display = tab==='tiket'?'block':'none';
 }
-
 function cariStatus() {
   const wrap = document.getElementById('track-result');
-  const q = activeTrackTab === 'hp' 
-    ? document.getElementById('input-hp').value.trim().replace(/[-\s]/g, '') 
-    : document.getElementById('input-tiket').value.trim().replace('#', '');
-
-  if (!q) { 
-    showTrackEmpty(wrap, '⚠️', 'Input Kosong', 'Masukkan No HP atau Tiket.'); 
-    return; 
+  const orders = loadOrders();
+  let results = [];
+  if (activeTrackTab === 'hp') {
+    const q = document.getElementById('input-hp').value.trim().replace(/[-\s]/g,'');
+    if (!q) { showTrackEmpty(wrap,'⚠️','Nomor HP kosong','Masukkan nomor HP yang kamu daftarkan saat service.'); return; }
+    results = orders.filter(o => o.hp.replace(/[-\s]/g,'').includes(q));
+  } else {
+    const q = document.getElementById('input-tiket').value.trim().replace('#','');
+    if (!q) { showTrackEmpty(wrap,'⚠️','Nomor tiket kosong','Masukkan nomor tiket yang kamu terima saat mendaftar.'); return; }
+    results = orders.filter(o => String(o.id).padStart(3,'0') === q.padStart(3,'0'));
   }
-
-  // Ambil data dari LocalStorage + Dummy
-  const savedOrders = loadOrders();
-  const allOrders = [...savedOrders, ...DUMMY_SERVICE_DATA];
-
-  // Filter hasil
-  let results = allOrders.filter(o => {
-    if (activeTrackTab === 'hp') {
-      const noHp = o.hp ? o.hp.replace(/[-\s]/g, '') : '';
-      return noHp.includes(q) || (o.nama && o.nama.toLowerCase().includes(q.toLowerCase()));
-    } else {
-      const ticket = String(o.id).padStart(3, '0');
-      return ticket === q.padStart(3, '0');
-    }
-  });
-
-  if (results.length === 0) { 
-    showTrackEmpty(wrap, '😕', 'Tidak Ditemukan', 'Coba nomor ini: 081234567890'); 
-    return; 
-  }
-
-  // Urutkan & Render
-  const sorted = [...results].sort((a, b) => b.id - a.id);
+  if (results.length === 0) { showTrackEmpty(wrap,'😕','Tidak ditemukan','Data service tidak ditemukan. Pastikan nomor yang kamu masukkan sudah benar.'); return; }
+  const sorted = [...results].sort((a,b)=>b.id-a.id);
   wrap.innerHTML = `<div style="font-size:13px;color:var(--text3);margin-bottom:14px;text-align:center">Ditemukan ${sorted.length} service</div>` + sorted.map(renderTrackCard).join('');
 }
-
 function renderTrackCard(o) {
-  const sc = {Antrian:'s-antrian', Proses:'s-proses', Selesai:'s-selesai'}[o.status] || 's-antrian';
-  const se = {Antrian:'⏳', Proses:'⚙️', Selesai:'✅'}[o.status];
-  const steps = ['Antrian', 'Proses', 'Selesai'];
+  const sc = {Antrian:'s-antrian',Proses:'s-proses',Selesai:'s-selesai'}[o.status]||'s-antrian';
+  const se = {Antrian:'⏳',Proses:'⚙️',Selesai:'✅'}[o.status];
+  const steps = ['Antrian','Proses','Selesai'];
   const ci = steps.indexOf(o.status);
-  const tl = steps.map((s, i) => `
-    <div class="tl-step ${i < ci ? 'done' : ''} ${i === ci ? 'active' : ''}">
-      <div class="tl-dot">${i < ci ? '✓' : ['📋', '🔧', '✅'][i]}</div>
-      <div class="tl-label">${s}</div>
-    </div>
-  `).join('');
-
-  const waMsg = encodeURIComponent(`Halo FixTech, saya ingin menanyakan status HP saya.\n\n🎫 Tiket: #${String(o.id).padStart(3,'0')}\n👤 Nama: ${o.nama}\n📱 ${o.merek} ${o.seri}`);
-  
+  const tl = steps.map((s,i)=>`<div class="tl-step ${i<ci?'done':''} ${i===ci?'active':''}"><div class="tl-dot">${i<ci?'✓':['📋','🔧','✅'][i]}</div><div class="tl-label">${s}</div></div>`).join('');
+  const waMsg = encodeURIComponent(`Halo FixTech, saya ingin menanyakan status HP saya.\n\n🎫 No. Tiket: #${String(o.id).padStart(3,'0')}\n👤 Nama: ${o.nama}\n📱 ${o.merek} ${o.seri}\n\nMohon update statusnya ya, terima kasih 🙏`);
   return `<div class="order-card">
-    <div class="order-card-header">
-      <div>
-        <div class="order-id-text">Tiket #${String(o.id).padStart(3,'0')}</div>
-        <div class="order-date-text">📅 ${o.tanggal}</div>
-      </div>
-      <span class="status-badge ${sc}">${se} ${o.status}</span>
-    </div>
+    <div class="order-card-header"><div><div class="order-id-text">Tiket #${String(o.id).padStart(3,'0')}</div><div class="order-date-text">📅 ${o.tanggal}</div></div><span class="status-badge ${sc}">${se} ${o.status}</span></div>
     <div class="order-body">
       <div class="detail-grid">
         <div><div class="detail-label">Nama</div><div class="detail-val">${o.nama}</div></div>
+        <div><div class="detail-label">No. HP</div><div class="detail-val cyan">${o.hp}</div></div>
         <div><div class="detail-label">Merek</div><div class="detail-val">${o.merek}</div></div>
-        <div><div class="detail-label">Seri</div><div class="detail-val cyan">${o.seri}</div></div>
-        <div><div class="detail-label">Kerusakan</div><div class="detail-val">${o.kerusakan}</div></div>
+        <div><div class="detail-label">Seri</div><div class="detail-val">${o.seri}</div></div>
       </div>
-      ${o.deskripsi ? `<div class="deskripsi-box">📝 ${o.deskripsi}</div>` : ''}
-      <div class="biaya-row">
-        <span>Biaya Service</span>
-        <span class="biaya-val">${o.biaya > 0 ? 'Rp ' + o.biaya.toLocaleString('id') : 'Menunggu Konfirmasi'}</span>
-      </div>
-      <div class="timeline-wrap">
-        <div class="timeline-lbl">Progress Perbaikan</div>
-        <div class="tl-steps">${tl}</div>
-      </div>
+      <div style="margin-bottom:12px"><div class="detail-label">Kerusakan</div><div class="detail-val" style="margin-top:4px">${o.kerusakan}</div></div>
+      ${o.deskripsi?`<div class="deskripsi-box">📝 ${o.deskripsi}</div>`:''}
+      <div class="biaya-row"><span style="font-size:13px;color:var(--text2)">Estimasi Biaya</span><span class="biaya-val">${o.biaya&&o.biaya>0?'Rp '+Number(o.biaya).toLocaleString('id'):'Menunggu konfirmasi'}</span></div>
+      <div class="timeline-wrap"><div class="timeline-lbl">Progress Perbaikan</div><div class="tl-steps">${tl}</div></div>
       <a href="https://wa.me/${WA_NUMBER}?text=${waMsg}" target="_blank" class="btn-wa-link" style="margin-top:16px">💬 Tanya Status via WhatsApp</a>
     </div>
   </div>`;
 }
-
 function showTrackEmpty(wrap, icon, title, desc) {
-  wrap.innerHTML = `<div class="state-box">
-    <div class="sicon">${icon}</div>
-    <h3>${title}</h3>
-    <p>${desc}</p>
-    <a href="https://wa.me/${WA_NUMBER}" target="_blank" class="btn-wa-link" style="max-width:280px;margin:20px auto 0">💬 Hubungi via WhatsApp</a>
-  </div>`;
+  wrap.innerHTML = `<div class="state-box"><div class="sicon">${icon}</div><h3>${title}</h3><p>${desc}</p><a href="https://wa.me/${WA_NUMBER}" target="_blank" class="btn-wa-link" style="max-width:280px;margin:20px auto 0">💬 Hubungi via WhatsApp</a></div>`;
 }
 
 /* ═══ ADMIN LOGIN ═══ */
@@ -1314,14 +1205,20 @@ async function doLogin() {
   const btn = document.getElementById('btn-login');
   if (!user||!pass) { showLoginError('Mohon isi username dan password.'); return; }
   btn.classList.add('loading'); btn.innerHTML='<span>⏳</span> Memverifikasi...';
-  await new Promise(r=>setTimeout(r,700));
-  // Kredensial: username=admin, password=fixtech2025
+  await new Promise(r=>setTimeout(r,600));
   if (user==='admin' && pass==='fixtech2025') {
-    btn.innerHTML='<span>✅</span> Berhasil!';
+    btn.innerHTML='<span>✅</span> Berhasil! Mengalihkan...';
+    // Set auth DULU sebelum goTo
     sessionStorage.setItem('fixtech_admin_auth','true');
     sessionStorage.setItem('fixtech_admin_user', user);
-    sessionStorage.setItem('fixtech_login_time', Date.now());
-    setTimeout(()=>goTo('admin-dashboard'), 700);
+    sessionStorage.setItem('fixtech_login_time', String(Date.now()));
+    // Seed dummy data kalau belum ada data sama sekali
+    if (loadOrders().length === 0) seedDummyData();
+    // Tunggu sebentar baru pindah halaman
+    setTimeout(() => {
+      btn.classList.remove('loading');
+      goTo('admin-dashboard');
+    }, 500);
   } else {
     loginAttempts++;
     btn.classList.remove('loading'); btn.innerHTML='<span>🔐</span> Masuk ke Dashboard';
@@ -1349,52 +1246,71 @@ function showLoginError(msg) {
   e.classList.add('show');
 }
 
+// Seed dummy data untuk demo/testing
+function seedDummyData() {
+  const now = new Date();
+  const tglHari = now.toLocaleDateString('id-ID');
+  const jam = now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+  const kemarin = new Date(now); kemarin.setDate(now.getDate()-1);
+  const tglKemarin = kemarin.toLocaleDateString('id-ID');
+  const dummy = [
+    {id:1,nama:'Budi Santoso',hp:'081234567890',alamat:'Jl. Merdeka No. 10, Jakarta',merek:'Samsung',seri:'Galaxy S23',kerusakan:'LCD / Layar Retak',deskripsi:'Layar retak di pojok kiri bawah sejak jatuh',status:'Proses',biaya:350000,tanggal:tglHari+' 09:30',tgl_selesai:null,sumber:'Form Website'},
+    {id:2,nama:'Rina Dewi',hp:'087654321098',alamat:'Jl. Sudirman No. 5, Bandung',merek:'iPhone / Apple',seri:'iPhone 14 Pro',kerusakan:'Baterai Boros / Drop',deskripsi:'Baterai habis sangat cepat',status:'Selesai',biaya:450000,tanggal:tglHari+' 08:00',tgl_selesai:tglHari+' 14:00',sumber:'Form Website'},
+    {id:3,nama:'Agus Wijaya',hp:'089876543210',alamat:'Jl. Gatot Subroto No. 88, Surabaya',merek:'Xiaomi',seri:'Redmi Note 12',kerusakan:'Tidak Bisa Charge',deskripsi:'Port charging longgar',status:'Antrian',biaya:0,tanggal:tglHari+' 11:15',tgl_selesai:null,sumber:'Manual Admin'},
+    {id:4,nama:'Siti Rahayu',hp:'082345678901',alamat:'Jl. Diponegoro No. 3, Yogyakarta',merek:'OPPO',seri:'Reno 8',kerusakan:'Kamera Bermasalah',deskripsi:'Kamera belakang buram',status:'Selesai',biaya:280000,tanggal:tglKemarin+' 10:00',tgl_selesai:tglKemarin+' 16:30',sumber:'Form Website'},
+    {id:5,nama:'Doni Prakoso',hp:'085678901234',alamat:'Jl. Ahmad Yani No. 22, Semarang',merek:'Vivo',seri:'Y35',kerusakan:'Mati Total',deskripsi:'HP tiba-tiba mati dan tidak bisa dinyalakan',status:'Antrian',biaya:0,tanggal:tglHari+' 13:00',tgl_selesai:null,sumber:'Form Website'},
+  ];
+  saveOrders(dummy);
+  console.log('✅ Dummy data ditambahkan! Cek status dengan HP: 081234567890 / 087654321098 / tiket: 001-005');
+}
+
 /* ═══ ADMIN DASHBOARD ═══ */
 const admTitles={dashboard:'Dashboard',pesanan:'Pesanan Service',keuangan:'Keuangan & Omset',stok:'Stok Sparepart'};
 let currentOrderId=null,lastOrderCount=0,currentLaporanPeriod='hari',activeStatusTab='';
 
-function initDashboard() {
-  // Cek Auth
-  if (sessionStorage.getItem('fixtech_admin_auth') !== 'true') {
-    goTo('admin-login');
-    return;
-  }
-  
-  // Cek Sesi
-  const login = parseInt(sessionStorage.getItem('fixtech_login_time') || '0');
-  if (Date.now() - login > 8 * 60 * 60 * 1000) {
-    sessionStorage.clear();
-    goTo('admin-login');
-    return;
-  }
+function initDashboard(){
+  // Auth sudah dicek di goTo(), tapi double check untuk keamanan
+  if(sessionStorage.getItem('fixtech_admin_auth')!=='true'){goTo('admin-login');return;}
+  // Auto logout 8 jam
+  const login=parseInt(sessionStorage.getItem('fixtech_login_time')||'0');
+  if(login > 0 && Date.now()-login > 8*60*60*1000){sessionStorage.clear();goTo('admin-login');return;}
+  // Set nama admin
+  const nama = sessionStorage.getItem('fixtech_admin_user')||'Admin';
+  const el = document.getElementById('admin-name-display');
+  if(el) el.textContent = nama;
+  // Set tanggal
+  const d=new Date();
+  const tglEl = document.getElementById('topbar-date');
+  if(tglEl) tglEl.textContent=
+    ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][d.getDay()]+', '+
+    d.getDate()+' '+['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'][d.getMonth()]+' '+d.getFullYear();
+  // Reset ke halaman dashboard
+  document.querySelectorAll('.adm-page').forEach(p=>p.classList.remove('active'));
+  const dashPage = document.getElementById('adm-dashboard');
+  if(dashPage) dashPage.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const navDash = document.getElementById('nav-dashboard');
+  if(navDash) navDash.classList.add('active');
+  const pageTitle = document.getElementById('page-title');
+  if(pageTitle) pageTitle.textContent='Dashboard';
+  // Render semua komponen
+  try{ renderDashboard(); }catch(e){ console.error('renderDashboard error:',e); }
+  try{ updateStokBadge(); }catch(e){ console.error('updateStokBadge error:',e); }
+  try{ renderNotifPanel(); }catch(e){ console.error('renderNotifPanel error:',e); }
+  lastOrderCount=loadOrders().length;
+}
+function doLogout(){if(confirm('Yakin mau keluar dari panel admin?')){sessionStorage.clear();goTo('landing');}}
 
-  // Force Tampil Sidebar (Fix Sidebar Tersembunyi)
-  const sidebar = document.querySelector('.sidebar');
-  if (sidebar) {
-    sidebar.style.transform = 'translateX(0)';
-    sidebar.style.display = 'flex';
-  }
-  
-  // Inisialisasi Halaman
-  document.getElementById('admin-name-display').textContent = sessionStorage.getItem('fixtech_admin_user') || 'Admin';
-  
-  const d = new Date();
-  document.getElementById('topbar-date').textContent = 
-    ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][d.getDay()] + ', ' + 
-    d.getDate() + ' ' + ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'][d.getMonth()] + ' ' + d.getFullYear();
-
-  // Reset View
-  document.querySelectorAll('.adm-page').forEach(p => p.classList.remove('active'));
-  document.getElementById('adm-dashboard').classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('nav-dashboard').classList.add('active');
-  document.getElementById('page-title').textContent = 'Dashboard';
-
-  // Load Data
-  renderDashboard();
-  updateStokBadge();
-  renderNotifPanel();
-  lastOrderCount = loadOrders().length;
+function goAdmPage(name,navEl){
+  document.querySelectorAll('.adm-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const page=document.getElementById('adm-'+name);if(page)page.classList.add('active');
+  document.getElementById('page-title').textContent=admTitles[name]||name;
+  if(navEl)navEl.classList.add('active');
+  if(name==='dashboard')renderDashboard();
+  if(name==='pesanan')renderPesanan();
+  if(name==='keuangan')renderKeuangan();
+  if(name==='stok')renderStok();
 }
 
 /* DATA */
